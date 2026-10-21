@@ -1,0 +1,13 @@
+{
+  "schema": "leeway.model-hub.discovery.v1",
+  "owner": "LeeWay Industries",
+  "canonical_repo": "https://github.com/4citeB4U/LeeWay-Model-Hub",
+  "public_widget": "https://4citeb4u.github.io/LeeWay-Model-Hub/",
+  "public_catalog": "https://4citeb4u.github.io/LeeWay-Model-Hub/catalog/models.json",
+  "api_contract": "https://github.com/4citeB4U/LeeWay-Model-Hub/blob/main/README.md",
+  "api_url": null,
+  "api_url_note": "Owner must supply a reachable authenticated LeeWay inference service. No public GPU host is implied.",
+  "legacy_catalog": "https://github.com/4citeB4U/LeeWay-Pocket-Agent/blob/main/model-hub/catalog/portable-gemma.v1.json",
+  "provenance": "LeeWay Pocket Agent / LeeWay GPU / SlowLane",
+  "requires_independent_gpu_attestation": true
+}

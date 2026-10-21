@@ -1,0 +1,21 @@
+# LEEWAY HEADER — DO NOT REMOVE
+# REGION: MODEL_HUB / REPOSITORY_HYGIENE
+# TAG: LEEWAY-MODEL-HUB-GITIGNORE-20261021
+# WHO: Leonard Jerome Lee / LeeWay Industries
+# WHAT: Prevent credential, binary weight, log, and local state publication
+# WHEN: 2026-10-21
+# WHERE: LeeWay-Model-Hub
+# WHY: GitHub is source authority, not secret or runtime storage
+# HOW: Explicit exclusion patterns
+.env
+.env.*
+!.env.example
+node_modules/
+*.gguf
+*.safetensors
+*.bin
+*.log
+.local/
+data/
+runtime/
+secrets/

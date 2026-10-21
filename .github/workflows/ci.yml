@@ -1,0 +1,28 @@
+# LEEWAY HEADER — DO NOT REMOVE
+# REGION: MODEL_HUB / CI
+# TAG: LEEWAY-MODEL-HUB-GITHUB-TESTS-20261021
+# WHO: LeeWay Industries; assistant implementation contributor
+# WHAT: Test independent service on GitHub without GPU performance claims
+# WHEN: 2026-10-21
+# WHERE: .github/workflows/ci.yml
+# WHY: Push quality guard for public model-hub repository
+# HOW: Node runtime tests and syntax validation
+# AUTHORITY: Source tests only; not production acceptance
+# LICENSE: LeeWay original workflow
+name: Model Hub Checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm test
+      - run: npm run check

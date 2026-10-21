@@ -23,12 +23,60 @@
       "weightLicense": "Google Gemma Terms",
       "family": "Gemma",
       "description": "Lower-memory catalog option; not certified on target phones."
+    },
+    {
+      "id": "qwen-3-5-4b-local",
+      "displayName": "Qwen 3.5 · 4B (installed on Windows host)",
+      "ollama": "qwen3.5:4b",
+      "hfRepo": null,
+      "gguf": null,
+      "weightLicense": "Verify runtime manifest/upstream terms",
+      "family": "Qwen",
+      "description": "Observed installed through Ollama on owner Windows PC; no PocketPal GGUF artifact identity asserted."
+    },
+    {
+      "id": "qwen-2-5-0-5b-local",
+      "displayName": "Qwen 2.5 · 0.5B (installed on Windows host)",
+      "ollama": "qwen2.5:0.5b",
+      "hfRepo": null,
+      "gguf": null,
+      "weightLicense": "Verify runtime manifest/upstream terms",
+      "family": "Qwen",
+      "description": "Observed installed through Ollama. An exact mobile GGUF artifact has not been established."
+    },
+    {
+      "id": "gemma-4-e4b-local",
+      "displayName": "Gemma 4 · e4b (installed on Windows host)",
+      "ollama": "gemma4:e4b",
+      "hfRepo": null,
+      "gguf": null,
+      "weightLicense": "Google Gemma Terms",
+      "family": "Gemma",
+      "description": "Observed on owner Ollama inventory; local and cross-device execution requirements differ. GPU residency is not proven."
     }
   ],
   "rules": {
     "listedDoesNotMeanDownloaded": true,
     "downloadedDoesNotMeanWarm": true,
     "inferenceDoesNotMeanGpu": true,
-    "receiptRequiredForProduction": true
+    "receiptRequiredForProduction": true,
+    "searchIsNotOwnerApproval": true,
+    "pocketPalMarketplaceIsNotExecutionAuthority": true
+  },
+  "description": "Selected model catalog plus dynamic discovery from Hugging Face GGUF, as supported by PocketPal's own model search. Listing is not inference admission.",
+  "discovery": {
+    "source": "Hugging Face GGUF public model API (used for discovery in PocketPal)",
+    "mode": "SEARCH_NOT_EXECUTION",
+    "families": [
+      "Gemma",
+      "Qwen",
+      "Llama",
+      "Phi",
+      "Mistral",
+      "DeepSeek",
+      "Granite",
+      "SmolLM"
+    ],
+    "note": "Potentially thousands of repositories; a user-approved model import plus runnable backend and license checks are required before execution."
   }
 }

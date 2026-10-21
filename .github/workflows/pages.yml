@@ -1,0 +1,40 @@
+# LEEWAY HEADER — DO NOT REMOVE
+# REGION: MODEL_HUB / PUBLIC_WIDGET_DELIVERY
+# TAG: LEEWAY-MODEL-HUB-PAGES-WIDGET-20261021
+# WHO: LeeWay Industries; assistant implementation contributor
+# WHAT: Publish only static UI and public model catalog, never inference or credentials
+# WHEN: 2026-10-21
+# WHERE: .github/workflows/pages.yml
+# WHY: GitHub Pages is model-hub discovery and UI hosting
+# HOW: Staged sanitized public asset build and Pages artifact
+# AUTHORITY: UI publication only; GPU is a separate execution runtime
+# LICENSE: LeeWay original workflow
+name: Publish Model Hub Widget
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package static widget and catalog
+        run: |
+          mkdir -p _site/catalog
+          cp public/index.html _site/index.html
+          cp catalog/models.json _site/catalog/models.json
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

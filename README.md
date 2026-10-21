@@ -5,6 +5,24 @@ Independent, portable, source-controlled **LeeWay Model Hub** microservice and r
 **Owner / source authority:** LeeWay Industries · Leonard Jerome Lee.
 **State:** functional local inference candidate. **Not** production-certified GPU/Formula/Veritas.
 
+## Screenshot repair and expanded PocketPal discovery — 2026-10-21
+
+The earlier public widget mistakenly used `location.origin` on GitHub Pages as the inference API. The website returned HTML for `/v1/chat`, causing `SyntaxError: Unexpected token '<'`. The widget now **never** treats GitHub Pages or Vercel as a model inference endpoint. Its public catalog and live HF GGUF discovery work without an API; model activation and chat stay disabled until an actual owner-authorized Model Hub service is connected. Incorrect HTML responses now produce readable service errors rather than appearing as chat output.
+
+The canonical catalog contains **five registered model identities**. As observed on the owner PC, **four were installed** (Gemma 3 1B GGUF, Gemma 4 e4b, Qwen 3.5 4B and Qwen 2.5 0.5B); Gemma 3 270M was catalog-only. This is not intended to enumerate the Hugging Face ecosystem. PocketPal can search public GGUF repositories via its existing Hugging Face integration, and the public LeeWay widget now has equivalent **discovery-only** search; discovery is not automatic authorization, download or inference.
+
+`MODEL_HUB_AUTOSTART_MODEL=gemma-3-1b-q4km` instructs the owner-side runtime to wake one selected, already-installed model on startup. The owner deployment also set `MODEL_HUB_KEEP_ALIVE=-1` (sent to Ollama as a **number**) so the selected model requests indefinite residency, subject to host memory constraints. Selecting a different allowlisted, installed model unloads the previous one and activates the new model. Tests verified real Gemma → Qwen 2.5 0.5B → Gemma switching with the reported active model matching the provider's response.
+
+The owner-local launcher `.local/start-modelhub.ps1` is **not committed**; it loads a private bearer token from `.local/auth-token.txt`. A per-user Windows Startup entry was installed for auto-launch after logon. A Task Scheduler setup was rejected by the OS (access denied) and not used. The startup launcher avoids creating a duplicate if the service already listens on the assigned port. Persistence after reboot has **not** been independently demonstrated.
+
+**Live URLs:**
+- Static UI: https://4citeb4u.github.io/LeeWay-Model-Hub/
+- Vercel UI: https://leeway-model-hub.vercel.app/
+- Owner's local inference host: `http://127.0.0.1:8879/` (available only on host or an authorized development tunnel)
+- Native PocketPal GGUF picker: `pocketpal://hub/run` only where PocketPal is installed.
+
+**Qualification boundary:** No authenticated public HTTPS inference endpoint or physical LeeWay GPU **LLM** provider is bound. The selected installed model was observed in Ollama at **0 reported VRAM bytes**, so neither the UI nor the service claims LeeWay GPU acceleration. Real GPU compute evidence and canonical Formula/LDWMD/Continuum/Veritas admission are independent gates. Cross-device public connectivity, mobile offline model inference and iOS acceptance remain unverified for the new service.
+
 ## Why separated
 
 Pocket Agent Lee used to contain a small Gemma model catalog at `model-hub/catalog/portable-gemma.v1.json`. This repository extracts that selection contract into **one shared Model Hub**, preserving Pocket Agent and SlowLane as clients rather than creating competing authorities. The existing native floating widget remains an independent UI host; this repo provides an embeddable responsive service UI. Do not delete historical source until adapters have passed tests.

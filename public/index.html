@@ -57,7 +57,18 @@ async function connect(){
  if(s.activeModel)q('#model').value=s.activeModel;
  q('#modelStatus').textContent=models.models.map(m=>m.id+': '+(m.installed?'installed':'not installed')+', '+(m.loaded?'warm':'cold')).join(' · ');
  updateLink();show(s);state.textContent=s.activeModel?'ACTIVE: '+s.activeModel:'CONNECTED / NO ACTIVE MODEL';
- }catch(e){show(String(e));state.textContent='UNAVAILABLE';}
+ }catch(e){
+  try{
+    const r=await fetch('./catalog/models.json',{cache:'no-store'});
+    if(!r.ok)throw Error('CATALOG_NOT_PUBLISHED');
+    const c=await r.json();catalog=c.models||[];
+    q('#model').replaceChildren(...catalog.map(m=>{const option=document.createElement('option');option.value=m.id;option.textContent=m.displayName;return option}));
+    updateLink();
+    q('#modelStatus').textContent='Public model registry loaded. No inference endpoint connected.';
+    state.textContent='CATALOG ONLY / BACKEND UNBOUND';
+    show({catalog:'PUBLIC_DISCOVERY_READY',service:'UNBOUND',detail:String(e),next:'Connect an owner-authorized LeeWay inference host.'});
+  }catch(err){show(String(err));state.textContent='UNAVAILABLE';}
+ }
 }
 function message(kind,text){const el=document.createElement('div');el.className='line';const label=document.createElement('strong');label.textContent=kind;el.append(label,document.createTextNode(text));q('#chat').append(el);q('#chat').scrollTop=q('#chat').scrollHeight}
 q('#connect').onclick=connect;q('#model').onchange=updateLink;

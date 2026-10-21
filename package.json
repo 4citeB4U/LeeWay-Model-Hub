@@ -1,0 +1,14 @@
+{
+  "name": "@leeway/model-hub",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "LeeWay sovereign model registry, inference router and portable model widget",
+  "engines": {"node": ">=20"},
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check src/server.mjs"
+  },
+  "license": "UNLICENSED"
+}

@@ -32,7 +32,7 @@ const matches=(provided,secret)=>{
 };
 
 export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
-      gpuUrl='', gpuToken='', fetchImpl=fetch, allowedOrigins=[], readUi=()=>load('public/index.html')}={}) {
+      gpuUrl='', gpuToken='', keepAlive='20m', fetchImpl=fetch, allowedOrigins=[], readUi=()=>load('public/index.html')}={}) {
   if(!catalog?.models?.length) throw Error('CATALOG_REQUIRED');
   const choices=new Map(catalog.models.map(m=>[m.id,m]));
   if(choices.size!==catalog.models.length)throw Error('DUPLICATE_MODEL_ID');
@@ -101,7 +101,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
           const old=choices.get(activeId);
           await ollama('/api/generate',{method:'POST',body:{model:old.ollama,prompt:'',stream:false,keep_alive:0},timeout:30000});
         }
-        await ollama('/api/generate',{method:'POST',body:{model:model.ollama,prompt:'',stream:false,keep_alive:'20m'},timeout:120000});
+        await ollama('/api/generate',{method:'POST',body:{model:model.ollama,prompt:'',stream:false,keep_alive:keepAlive},timeout:120000});
       }
       provider=backend;activeId=id;lastWarmTime=new Date().toISOString();lastError=null;
       return {selected:id,backend,readyForRequests:true,modelWarmRequestedAt:lastWarmTime,
@@ -123,7 +123,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
     }
     const reply=await ollama('/api/generate',{method:'POST',
       body:{model:model.ollama,prompt:message,think:false,stream:false,
-        options:{temperature:0.2,num_predict:192},keep_alive:'20m'},timeout:120000});
+        options:{temperature:0.2,num_predict:192},keep_alive:keepAlive},timeout:120000});
     const text=reply.response;
     if(!bounded(text,12000))throw Error('MODEL_GENERATED_NO_USABLE_TEXT');
     const inv=await ollama('/api/ps',{timeout:8000}).catch(()=>({models:[]}));
@@ -183,16 +183,30 @@ export async function start(){
   const hub=createHub({catalog,token:process.env.MODEL_HUB_TOKEN||'',
     ollamaUrl:process.env.MODEL_HUB_OLLAMA_URL||'http://127.0.0.1:11434',
     gpuUrl:process.env.LEEWAY_GPU_INFERENCE_URL||'',gpuToken:process.env.LEEWAY_GPU_INFERENCE_TOKEN||'',
+    keepAlive:process.env.MODEL_HUB_KEEP_ALIVE||'-1',
     allowedOrigins});
   const server=http.createServer((req,res)=>hub.handler(req,res).catch(e=>{
     if(!res.headersSent)json(res,500,{error:'SERVICE_ERROR',detail:safeError(e)},null,new Set());
   }));
-  server.listen(port,host,()=>console.log(JSON.stringify({
-    service:'LEEWAY_MODEL_HUB',url:'http://'+host+':'+port,
-    authenticated:!!process.env.MODEL_HUB_TOKEN,
-    leeWayGpuProviderConfigured:!!process.env.LEEWAY_GPU_INFERENCE_URL,
-    status:'SERVING_NOT_PRODUCTION_ADMITTED'
-  })));
+  server.listen(port,host,()=>{
+    console.log(JSON.stringify({
+      service:'LEEWAY_MODEL_HUB',url:'http://'+host+':'+port,
+      authenticated:!!process.env.MODEL_HUB_TOKEN,
+      leeWayGpuProviderConfigured:!!process.env.LEEWAY_GPU_INFERENCE_URL,
+      status:'SERVING_NOT_PRODUCTION_ADMITTED'
+    }));
+    // Owner-configured autowarm: host runtime can be ready before any phone, PC or web client connects.
+    // Physical GPU use is not inferred from activation. A real LeeWay GPU inference provider stays fail-closed.
+    const bootModel=process.env.MODEL_HUB_AUTOSTART_MODEL||'';
+    const bootBackend=process.env.MODEL_HUB_AUTOSTART_BACKEND||'OLLAMA';
+    if(bootModel){
+      hub.select(bootModel,bootBackend).then(v=>
+        console.log(JSON.stringify({event:'MODEL_AUTO_WARMED',model:v.selected,backend:v.backend,gpuProof:v.gpuProof}))
+      ).catch(e=>
+        console.error(JSON.stringify({event:'MODEL_AUTO_WARM_FAILED',error:safeError(e)}))
+      );
+    }
+  });
   return {server,hub};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url))await start();

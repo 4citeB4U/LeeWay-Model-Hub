@@ -118,3 +118,15 @@ test('input bounds and missing activation state enforced',async()=>{
   assert.equal((await authorized(s.base,'/v1/chat',{message:'x'.repeat(6001)})).status,400);
  }finally{await s.close()}
 });
+
+test('public model catalog matches the canonical service catalog',async()=>{
+ const published=JSON.parse(await readFile(new URL('../public/catalog/models.json',import.meta.url),'utf8'));
+ assert.deepEqual(published,catalog);
+});
+test('portable client denies insecure non-localhost services',async()=>{
+ const {createModelHubClient}=await import('../clients/model-hub-client.mjs');
+ assert.throws(()=>createModelHubClient({baseUrl:'http://192.168.1.4:8879'}),/HTTPS_REQUIRED/);
+ assert.throws(()=>createModelHubClient({baseUrl:'https://someone:secret@example.com'}),/NOT_CANONICAL/);
+ const c=createModelHubClient({baseUrl:'http://127.0.0.1:8879'});
+ await assert.rejects(()=>c.activate('gemma-3-1b-q4km'),/OWNER_TOKEN_REQUIRED/);
+});

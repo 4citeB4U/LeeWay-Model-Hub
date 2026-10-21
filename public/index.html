@@ -1,87 +1,196 @@
 <!doctype html>
-<!-- LEEWAY HEADER — DO NOT REMOVE
-REGION: MODEL_HUB / PORTABLE_WIDGET
-TAG: LEEWAY-MODEL-HUB-WIDGET-20261021
-WHO: Leonard Jerome Lee (owner); OpenAI coding assistant (implementation)
-WHAT: Small, responsive, real Model Hub chat-and-model-switch interface
+<!--
+LEEWAY HEADER — DO NOT REMOVE
+REGION: LEEWAY_MODEL_HUB / RESPONSIVE_SERVICE_WIDGET
+TAG: LEEWAY-MODEL-HUB-UI-20261021-R2
+WHO: Leonard Jerome Lee, ecosystem creator; OpenAI assistant, implementation contributor
+WHAT: Service-bound model selection, optional PocketPal/Hugging Face discovery, active-model chat
 WHEN: 2026-10-21
-WHERE: GitHub repository; can run as standalone service UI or frame inside governed LeeWay widget
-WHY: Use one model selected by the service across Windows, Android and iOS
-HOW: Fetch LeeWay Model Hub API; no direct third-party model downloads or implied GPU success
-AUTHORITY: Demo client, not production governance
-LICENSE: LeeWay original work, owner controlled -->
+WHERE: LeeWay-Model-Hub/public/index.html
+WHY: Eliminate HTML-as-JSON error, keep inference on real LeeWay runtime and show more model choices
+HOW: Distinguish static discovery from authenticated API, JSON/content-type validation, honest status
+AUTHORITY: UI candidate; not certified GPU or private deployment
+LICENSE: LeeWay original code, owner reserved. Third-party model terms remain separate.
+-->
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LeeWay Model Hub</title>
 <style>
-:root{color-scheme:dark;--bg:#090d16;--panel:#111c29;--ink:#e8f5fb;--muted:#9baebe;--a:#42c8da}
-*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;background:radial-gradient(circle at 85% -20%,#234352,var(--bg) 65%);color:var(--ink)}
-.shell{width:min(950px,100%);padding:20px;margin:auto}.head{display:flex;justify-content:space-between;align-items:center;gap:14px;border-bottom:1px solid #2c4656;padding-bottom:15px}h1{font-size:21px;margin:0;letter-spacing:.02em}.sub{font-size:12px;color:var(--muted)}.live{padding:5px 9px;border-radius:20px;border:1px solid #49697b;font-size:12px}section{background:rgba(17,28,41,.87);border:1px solid #355466;border-radius:16px;padding:16px;margin:18px 0}.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.grow{flex:1;min-width:180px}label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}input,select,textarea{background:#0c1520;border:1px solid #456173;color:var(--ink);border-radius:8px;padding:10px;font:inherit;width:100%}button{background:#43c2d1;color:#04141c;border:0;border-radius:8px;padding:10px 15px;font-weight:700;cursor:pointer}button:disabled{opacity:.45;cursor:wait}.ghost{background:#1e3b4b;color:#dff6f9}.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:15px}@media(max-width:650px){.grid{grid-template-columns:1fr}.shell{padding:12px}}.chat{height:290px;overflow:auto;border:1px solid #2d495a;border-radius:10px;padding:12px;background:#0b1521}.line{white-space:pre-wrap;padding:10px;border-bottom:1px solid #293c4b}.line strong{display:block;color:#76dce7;font-size:12px}small{color:var(--muted)}.mono{font-family:ui-monospace,monospace;word-break:break-word}#status{font-size:12px;white-space:pre-wrap;min-height:80px}#info{font-size:12px;color:var(--muted)}footer{font-size:12px;color:var(--muted);padding-bottom:24px}
-</style></head><body><main class="shell">
-<header class="head"><div><h1>◉ LeeWay Model Hub</h1><div class="sub">Sovereign model selection · governed service · one active model</div></div><span class="live" id="state">DISCOVERING</span></header>
-<section><div class="row">
-<div class="grow"><label for="endpoint">LeeWay service endpoint</label><input id="endpoint" placeholder="http://127.0.0.1:8879" autocomplete="off"></div>
-<div class="grow"><label for="token">Owner API token (memory only)</label><input id="token" type="password" autocomplete="off" placeholder="Required to activate and chat"></div>
-<button id="connect" class="ghost">Connect</button>
-</div><div id="info">No remote GPU or model is assumed. Select a qualified provider.</div></section>
-<div class="grid"><section><label for="model">Selected LeeWay model</label><select id="model"><option>Connecting…</option></select>
-<div class="row" style="margin-top:10px"><select id="backend" class="grow"><option value="OLLAMA">Local LeeWay provider / Ollama</option><option value="LEEWAY_GPU">LeeWay GPU inference provider (qualification required)</option></select><button id="activate">Wake / Switch</button></div>
-<div style="margin-top:12px"><small id="modelStatus">No activation receipt</small></div>
-<div class="row" style="margin-top:12px"><a id="pocketpal" href="#" style="color:#87e3ed">Open mobile model picker</a></div>
-</section><section><strong>Real execution state</strong><pre id="status" class="mono"></pre></section></div>
-<section><strong>Model conversation</strong><div class="chat" id="chat" aria-live="polite"><div class="line"><strong>LeeWay</strong>Connect to the host and activate a model to begin.</div></div>
-<div class="row" style="margin-top:12px"><textarea id="prompt" class="grow" rows="2" placeholder="Ask the active model…"></textarea><button id="send">Send</button></div></section>
-<footer>No weights stored in this UI. Remote model inference happens only at the configured service. GPU certification, canonical Formula, Veritas and Continuum are separate acceptance gates. PocketPal mobile handoff opens the model selection screen; it does not silently install the model.</footer>
+:root{color-scheme:dark;--bg:#0a111b;--pane:#111d2c;--border:#2a4759;--ink:#f0f9fe;--muted:#a7bbc8;--teal:#64d3e4;--gold:#f2c984}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,Arial,sans-serif;background:radial-gradient(circle at 90% 0%,#203a4a,var(--bg) 66%);color:var(--ink)}
+.shell{max-width:1080px;margin:0 auto;padding:20px}h1{font-size:24px;margin:0;letter-spacing:.02em}h2{font-size:17px;margin:0 0 12px}.sub,small,.muted{color:var(--muted)}.sub{font-size:13px}.header{display:flex;gap:14px;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding:6px 0 17px;margin-bottom:18px}
+.badge{font-size:12px;border:1px solid #3f6476;border-radius:30px;padding:7px 11px;white-space:normal;text-align:center}.card{padding:17px;border:1px solid var(--border);border-radius:17px;background:rgba(17,29,44,.92);margin-bottom:16px}.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}input,select,textarea{width:100%;min-height:46px;border-radius:10px;background:#0a1521;border:1px solid #3a6074;color:var(--ink);font:inherit;padding:10px 12px}
+button{font:inherit;font-weight:700;border:0;border-radius:10px;background:var(--teal);color:#08202a;padding:11px 16px;cursor:pointer}button.secondary{background:#214052;color:var(--ink)}button:disabled{opacity:.5;cursor:not-allowed}
+details{border-top:1px solid var(--border);margin-top:14px;padding-top:12px}summary{cursor:pointer;color:#addde6;font-size:13px}.setting{padding:13px 0}
+.notice{padding:12px 14px;border:1px solid #426179;border-radius:10px;background:#122839;margin-top:10px;font-size:13px;color:#d6eef8}.notice.warn{border-color:#826e4a;background:#272217;color:#f9dfaf}
+.note{font-size:13px;color:var(--muted);margin-top:10px}.activity{margin:10px 0 0;font-size:13px;color:#bbe8ef;white-space:pre-wrap}.chat{height:285px;overflow:auto;background:#0b1522;border:1px solid var(--border);border-radius:12px;padding:10px}.message{padding:11px;border-bottom:1px solid #273b4c;white-space:pre-wrap;overflow-wrap:anywhere}.message strong{font-size:12px;display:block;color:#7ce4ed}.controls{display:flex;gap:10px;align-items:flex-end;margin-top:12px}.controls textarea{flex:1;min-width:0}.searchResults{max-height:300px;overflow:auto;margin-top:10px}.result{border-bottom:1px solid #2b4858;padding:12px 1px}.result strong{display:block;font-size:14px;overflow-wrap:anywhere}.result a{font-size:13px;color:#8bdfec;margin-right:14px}.result small{display:block}a{color:#8be4f1}footer{font-size:12px;color:var(--muted);padding:0 2px 22px}
+@media(max-width:680px){.shell{padding:11px}.grid,.two{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start}.controls{align-items:stretch}.controls button{align-self:flex-end}}
+</style></head>
+<body><main class="shell">
+<header class="header"><div><h1>◉ LeeWay Model Hub</h1><div class="sub">One selected model · one inference service · all LeeWay devices</div></div><div class="badge" id="serviceBadge" aria-live="polite">Checking LeeWay service</div></header>
+<section class="card">
+<div class="row" style="justify-content:space-between"><strong>LeeWay execution service</strong><button id="refresh" class="secondary" type="button">Refresh</button></div>
+<div id="serviceNotice" class="notice" role="status">Checking for an authorized service…</div>
+<details id="connections"><summary>Connection settings (owner / advanced)</summary>
+<div class="setting"><div class="two">
+<div><label for="endpoint">Actual LeeWay API endpoint (not GitHub Pages)</label><input id="endpoint" autocomplete="url" spellcheck="false" placeholder="https://your-private-leeway-gateway.example"></div>
+<div><label for="token">Owner access token — session only</label><input id="token" type="password" autocomplete="off" placeholder="Required for protected model controls"></div>
+</div><div class="row" style="margin-top:10px"><button id="connect" type="button">Connect authorized host</button></div>
+<div class="note">GitHub Pages/Vercel host this interface and the discovery catalog; an authorized HTTPS LeeWay service performs inference. Tokens are not saved in browser storage.</div></div>
+</details>
+</section>
+<div class="grid">
+<section class="card"><h2>Active LeeWay model</h2>
+<label for="model">Choose from the LeeWay model registry</label><select id="model" aria-label="Select a model"><option value="">Loading models…</option></select>
+<div id="modelStatus" class="note">Loading public catalog…</div>
+<div id="activationNotice" class="activity"></div>
+<div class="row" style="margin-top:12px"><button id="activate" type="button" disabled>Use selected model</button><a id="pocketpal" href="https://pocketpal.dev/" target="_blank" rel="noopener noreferrer">PocketPal mobile options</a></div>
+<div class="note">Choosing a model is lightweight. Only the selected model runs on the authorized compute host. Listed models are not necessarily downloaded or loaded.</div>
+</section>
+<section class="card"><h2>Execution status</h2><div id="status" class="notice">Discovering service…</div><div class="note" id="gpuStatus">GPU evidence is checked separately from the model catalog.</div></section>
+</div>
+<section class="card"><h2>Model conversation</h2><div class="chat" id="chat" aria-live="polite"><div class="message"><strong>LeeWay</strong>Select a model. Chat becomes available after connection to the authorized inference host.</div></div>
+<div class="controls"><textarea id="prompt" rows="2" placeholder="Ask your selected model…" disabled></textarea><button type="button" id="send" disabled>Send</button></div>
+</section>
+<section class="card"><h2>Explore PocketPal-compatible models</h2>
+<p class="sub">PocketPal discovers GGUF model repositories through Hugging Face; it is not limited to a fixed list of two Gemma models. Search other families, including Gemma, Qwen, Llama, Phi, Mistral, DeepSeek, Granite and SmolLM. Discovery is separate from installation and permission to run.</p>
+<div class="row"><input id="search" style="flex:1;min-width:180px" type="search" placeholder="Search Hugging Face GGUF repositories" aria-label="Search models"><button type="button" id="searchBtn">Find models</button></div>
+<div id="results" class="searchResults" aria-live="polite"><span class="muted">Search public Hugging Face model repositories to see further options.</span></div>
+</section>
+<footer>LeeWay remains the service authority. PocketPal is an optional offline/mobile GGUF runtime. The public UI does not execute an LLM. WebGPU deployment alone does not prove an independently certified LeeWay GPU LLM endpoint; CPU/VRAM and GPU backend status are shown as observed. Models may have separate licenses, download and hardware requirements.</footer>
 </main>
 <script type="module">
-const q=s=>document.querySelector(s); const state=q('#state');let catalog=[];
-const base=()=>q('#endpoint').value.trim().replace(/\/$/,'')||location.origin;
-q('#endpoint').value=location.protocol==='file:'?'http://127.0.0.1:8879':location.origin;
-const show=(str)=>q('#status').textContent=typeof str==='string'?str:JSON.stringify(str,null,2);
-const request=async(path,method='GET',body)=>{
- const headers={'content-type':'application/json'};
- if(method==='POST') headers.authorization='Bearer '+q('#token').value;
- const response=await fetch(base()+path,{method,headers,...(body?{body:JSON.stringify(body)}:{})});
- const data=await response.json();if(!response.ok)throw Error(data.error||'HTTP '+response.status);return data;
+const $=id=>document.getElementById(id);
+const STATIC_HOST=/(^|\.)(github\.io|vercel\.app)$/.test(location.hostname);
+const hostDefault=(!STATIC_HOST&&/^https?:$/.test(location.protocol))?location.origin:'';
+let endpoint=hostDefault, catalog=[],active=null,service=false,busy=false,installed=new Map(),status={};
+$('endpoint').value=hostDefault;
+const say=(msg,warn=false)=>{const el=$('serviceNotice');el.textContent=msg;el.className='notice'+(warn?' warn':'')};
+const setReady=()=>{
+ const permitted=service&&!!$('token').value.trim()&&!busy;
+ $('activate').disabled=!permitted;
+ $('send').disabled=!permitted||!active;
+ $('prompt').disabled=!permitted||!active;
 };
-const updateLink=()=>{
- const m=catalog.find(x=>x.id===q('#model').value);
- if(m&&m.hfRepo){
-   q('#pocketpal').href='pocketpal://hub/run?repo_id='+encodeURIComponent(m.hfRepo)+'&filename='+encodeURIComponent(m.gguf)+'&source=leeway-model-hub';
- }else q('#pocketpal').removeAttribute('href');
+const errorLabel=e=>e?.message==='API_NOT_JSON'?'The address is a website, not a LeeWay model API.':String(e?.message||e);
+const safeEndpoint=value=>{
+ const u=new URL(value);
+ if(u.username||u.password||u.search||u.hash)throw Error('Use only the base service address.');
+ const local=['localhost','127.0.0.1','[::1]'].includes(u.hostname);
+ if(u.protocol!=='https:'&&!(u.protocol==='http:'&&local))throw Error('An HTTPS service is required outside localhost.');
+ if(/(^|\.)(github\.io|vercel\.app)$/.test(u.hostname))throw Error('This is a static website, not the inference API.');
+ if(location.protocol==='https:'&&u.protocol==='http:')throw Error('An HTTPS page cannot securely connect to a plain HTTP backend.');
+ return u.origin+u.pathname.replace(/\/$/,'');
 };
-async function connect(){
+async function api(path,method='GET',body){
+ if(!endpoint)throw Error('NO_INFERENCE_SERVICE');
+ const headers={'accept':'application/json'};
+ if(method==='POST'){const token=$('token').value.trim();if(!token)throw Error('OWNER_ACCESS_REQUIRED');
+ headers.authorization='Bearer '+token;headers['content-type']='application/json';}
+ const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),160000);
  try{
- const [c,s,models]=await Promise.all([request('/v1/catalog'),request('/v1/status'),request('/v1/models')]);
- catalog=c.models;
- q('#model').replaceChildren(...catalog.map(m=>{const option=document.createElement('option');option.value=m.id;option.textContent=m.displayName;return option}));
- if(s.activeModel)q('#model').value=s.activeModel;
- q('#modelStatus').textContent=models.models.map(m=>m.id+': '+(m.installed?'installed':'not installed')+', '+(m.loaded?'warm':'cold')).join(' · ');
- updateLink();show(s);state.textContent=s.activeModel?'ACTIVE: '+s.activeModel:'CONNECTED / NO ACTIVE MODEL';
- }catch(e){
-  try{
-    const r=await fetch('./catalog/models.json',{cache:'no-store'});
-    if(!r.ok)throw Error('CATALOG_NOT_PUBLISHED');
-    const c=await r.json();catalog=c.models||[];
-    q('#model').replaceChildren(...catalog.map(m=>{const option=document.createElement('option');option.value=m.id;option.textContent=m.displayName;return option}));
-    updateLink();
-    q('#modelStatus').textContent='Public model registry loaded. No inference endpoint connected.';
-    state.textContent='CATALOG ONLY / BACKEND UNBOUND';
-    show({catalog:'PUBLIC_DISCOVERY_READY',service:'UNBOUND',detail:String(e),next:'Connect an owner-authorized LeeWay inference host.'});
-  }catch(err){show(String(err));state.textContent='UNAVAILABLE';}
- }
+  const r=await fetch(endpoint+path,{method,headers,...(body?{body:JSON.stringify(body)}:{}),signal:ctrl.signal});
+  if(!(r.headers.get('content-type')||'').includes('application/json'))throw Error('API_NOT_JSON');
+  const data=await r.json();
+  if(!r.ok)throw Error(data?.error||'Service rejected request (HTTP '+r.status+')');
+  return data;
+ }finally{clearTimeout(timer);}
 }
-function message(kind,text){const el=document.createElement('div');el.className='line';const label=document.createElement('strong');label.textContent=kind;el.append(label,document.createTextNode(text));q('#chat').append(el);q('#chat').scrollTop=q('#chat').scrollHeight}
-q('#connect').onclick=connect;q('#model').onchange=updateLink;
-q('#activate').onclick=async()=>{
- const btn=q('#activate');btn.disabled=true;
- try{const s=await request('/v1/models/activate','POST',{modelId:q('#model').value,backend:q('#backend').value});q('#modelStatus').textContent='Selected: '+s.selected+' · '+s.backend+' · '+s.gpuProof;await connect();}
- catch(e){show(String(e));}finally{btn.disabled=false;}
+const fillModels=()=>{
+ const select=$('model'),prior=select.value;
+ select.replaceChildren(...catalog.map(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.displayName;return o}));
+ if(prior&&catalog.some(m=>m.id===prior))select.value=prior;
+ if(active&&catalog.some(m=>m.id===active))select.value=active;
+ if(!catalog.length){const o=document.createElement('option');o.textContent='No models registered';o.value='';select.append(o);}
+ modelChanged(false);
 };
-q('#send').onclick=async()=>{
- const value=q('#prompt').value.trim();if(!value)return;
- q('#send').disabled=true;message('You',value);q('#prompt').value='';
- try{const r=await request('/v1/chat','POST',{message:value});message(r.modelId+' / '+r.backend,r.text);show({elapsedMs:r.elapsedMs,tokens:r.tokenCount,vramBytesReported:r.vramBytesReported,gpuClaim:r.gpuClaim});}
- catch(e){message('Error',String(e));}finally{q('#send').disabled=false;}
-};
-connect();
+function modelChanged(auto=true){
+ const m=catalog.find(m=>m.id===$('model').value);
+ if(m?.hfRepo){
+  $('pocketpal').href='pocketpal://hub/run?repo_id='+encodeURIComponent(m.hfRepo)+'&filename='+encodeURIComponent(m.gguf||'')+'&source=leeway-model-hub';
+  $('pocketpal').textContent='Open PocketPal model picker';
+  $('pocketpal').removeAttribute('target');
+ }else{$('pocketpal').href='https://pocketpal.dev/';$('pocketpal').textContent='PocketPal model downloads';$('pocketpal').target='_blank';}
+ const mstate=installed.get(m?.id);
+ $('modelStatus').textContent=m?(m.displayName+' · '+(mstate?.installed?'Installed on host':service?'Not installed on host':'Installation not verified')+' · '+(mstate?.loaded?'Warm':'Not warm')):'No available model';
+ $('activationNotice').textContent=active===m?.id?'This model is selected on the connected host.':service?'Choose a model to activate it on the service.':'Models available for discovery; inference host not connected.';
+ if(auto&&service&&$('token').value.trim()&&m?.id&&m.id!==active) activate();
+}
+async function publicCatalog(){
+ try{
+  const r=await fetch('./catalog/models.json',{cache:'no-store'});
+  if(!r.ok||!(r.headers.get('content-type')||'').includes('json'))throw Error('Catalog unavailable');
+  const j=await r.json();catalog=j.models||[];fillModels();
+ }catch{catalog=[];fillModels();$('modelStatus').textContent='Public model catalog is temporarily unavailable.';}
+}
+async function discover(){
+ if(!endpoint){service=false;active=null;$('serviceBadge').textContent='Model discovery only';say('Public catalog ready. No authenticated inference host is connected; you can browse models, but sending a prompt is unavailable.',true);$('status').textContent='Catalog online · Remote inference not connected';$('gpuStatus').textContent='LeeWay GPU inference provider: not verified here';setReady();return;}
+ try{
+  const h=await api('/health');
+  if(h.service!=='LEEWAY_MODEL_HUB')throw Error('The endpoint is not LeeWay Model Hub.');
+  const [c,s,list]=await Promise.all([api('/v1/catalog'),api('/v1/status'),api('/v1/models')]);
+  if(!Array.isArray(c.models))throw Error('Invalid model catalog returned.');
+  service=true;status=s;active=s.activeModel;
+  catalog=c.models;installed=new Map((list.models||[]).map(m=>[m.id,m]));
+  fillModels();
+  $('serviceBadge').textContent=active?'Model ready: '+active:'Service connected';
+  say('Connected to the LeeWay Model Hub. '+(active?'The selected model is ready to receive requests.':'Select a model for inference.'));
+  $('status').textContent='Service: connected\nBackend: '+(s.backend||'unknown')+'\nActive model: '+(active||'none');
+  $('gpuStatus').textContent='LeeWay GPU inference: '+(s.leeWayGpu?.status||'NOT_REPORTED')+(s.leeWayGpu?.gpuInferenceQualified?' (provider reports qualified)':' · no physical LLM GPU proof');
+ }catch(e){
+  service=false;active=null;$('serviceBadge').textContent='Model discovery only';
+  say('Model registry available. Inference host is not connected: '+errorLabel(e),true);
+  $('status').textContent='No validated inference service';
+  $('gpuStatus').textContent='LeeWay GPU model inference not connected';
+ }finally{setReady();}
+}
+async function activate(){
+ if(busy||!service)return;
+ const id=$('model').value;if(!id)return;
+ busy=true;setReady();$('activationNotice').textContent='Activating one model on the LeeWay service…';
+ try{
+  const backend=status.leeWayGpu?.gpuInferenceQualified===true?'LEEWAY_GPU':'OLLAMA';
+  const r=await api('/v1/models/activate','POST',{modelId:id,backend});
+  active=r.selected;$('activationNotice').textContent='Active: '+active+' · '+r.backend;
+  await discover();
+ }catch(e){$('activationNotice').textContent='Model not activated: '+errorLabel(e);}finally{busy=false;setReady();}
+}
+function message(kind,text){const el=document.createElement('div');el.className='message';const label=document.createElement('strong');label.textContent=kind;el.append(label,document.createTextNode(text));$('chat').append(el);$('chat').scrollTop=$('chat').scrollHeight;}
+async function chat(){
+ const msg=$('prompt').value.trim();if(!msg||!service||!active||busy)return;
+ busy=true;setReady();$('prompt').value='';message('You',msg);
+ try{const r=await api('/v1/chat','POST',{message:msg});message(r.modelId+' · '+r.backend,r.text);$('status').textContent='Model: '+r.modelId+'\nBackend: '+r.backend+'\nResponse: '+r.elapsedMs+' ms\nGPU: '+(r.gpuClaim||'NOT_PROVEN');}
+ catch(e){message('LeeWay', 'Request could not be completed: '+errorLabel(e));}
+ finally{busy=false;setReady();}
+}
+function clearResults(){const r=$('results');r.replaceChildren();return r;}
+async function search(){
+ const q=$('search').value.trim();const holder=clearResults();if(q.length<2){holder.textContent='Enter at least two characters.';return;}
+ $('searchBtn').disabled=true;holder.textContent='Searching PocketPal-compatible GGUF repositories…';
+ try{
+  const url='https://huggingface.co/api/models?search='+encodeURIComponent(q)+'&filter=gguf&limit=24';
+  const rsp=await fetch(url,{headers:{accept:'application/json'}});if(!rsp.ok)throw Error('Hugging Face search unavailable');
+  const results=await rsp.json();holder.replaceChildren();
+  if(!Array.isArray(results)||!results.length){holder.textContent='No matching public GGUF repositories were returned.';return;}
+  for(const item of results){
+   const repo=item.id||item.modelId||'';
+   if(!/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(repo))continue;
+   const el=document.createElement('div');el.className='result';
+   const name=document.createElement('strong');name.textContent=repo;el.append(name);
+   const meta=document.createElement('small');meta.textContent='Hugging Face repository · '+(Number(item.downloads||0).toLocaleString())+' downloads reported';el.append(meta);
+   const link=document.createElement('a');link.href='https://huggingface.co/'+repo;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Review model and license';el.append(link);
+   const mobile=document.createElement('a');mobile.href='pocketpal://hub/run?repo_id='+encodeURIComponent(repo)+'&source=leeway-model-hub';mobile.textContent='Open with PocketPal';el.append(mobile);holder.append(el);
+  }
+ }catch(e){holder.textContent='Live discovery unavailable: '+errorLabel(e)+'. You can still search models inside PocketPal.';}
+ finally{$('searchBtn').disabled=false;}
+}
+$('connect').addEventListener('click',async()=>{
+ try{endpoint=safeEndpoint($('endpoint').value.trim());$('connections').open=false;await discover();}
+ catch(e){say(errorLabel(e),true);}
+});
+$('refresh').onclick=discover;$('activate').onclick=activate;$('send').onclick=chat;
+$('model').onchange=()=>modelChanged(true);$('token').addEventListener('input',setReady);
+$('searchBtn').onclick=search;$('search').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+$('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chat()}});
+await publicCatalog();await discover();
 </script></body></html>

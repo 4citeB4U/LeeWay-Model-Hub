@@ -183,7 +183,7 @@ export async function start(){
   const hub=createHub({catalog,token:process.env.MODEL_HUB_TOKEN||'',
     ollamaUrl:process.env.MODEL_HUB_OLLAMA_URL||'http://127.0.0.1:11434',
     gpuUrl:process.env.LEEWAY_GPU_INFERENCE_URL||'',gpuToken:process.env.LEEWAY_GPU_INFERENCE_TOKEN||'',
-    keepAlive:process.env.MODEL_HUB_KEEP_ALIVE||'-1',
+    keepAlive:/^-?\d+$/.test(process.env.MODEL_HUB_KEEP_ALIVE||'')?Number(process.env.MODEL_HUB_KEEP_ALIVE):(process.env.MODEL_HUB_KEEP_ALIVE||'20m'),
     allowedOrigins});
   const server=http.createServer((req,res)=>hub.handler(req,res).catch(e=>{
     if(!res.headersSent)json(res,500,{error:'SERVICE_ERROR',detail:safeError(e)},null,new Set());

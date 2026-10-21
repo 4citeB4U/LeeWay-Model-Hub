@@ -1,0 +1,34 @@
+{
+  "schema": "leeway.model-hub.catalog.v1",
+  "origin": "https://github.com/4citeB4U/LeeWay-Pocket-Agent/blob/main/model-hub/catalog/portable-gemma.v1.json",
+  "owner": "LeeWay Industries / Leonard Jerome Lee",
+  "reviewed": "2026-10-21",
+  "models": [
+    {
+      "id": "gemma-3-1b-q4km",
+      "displayName": "Gemma 3 1B Instruct · Q4_K_M",
+      "ollama": "hf.co/lmstudio-community/gemma-3-1b-it-GGUF:Q4_K_M",
+      "hfRepo": "lmstudio-community/gemma-3-1b-it-GGUF",
+      "gguf": "gemma-3-1b-it-Q4_K_M.gguf",
+      "weightLicense": "Google Gemma Terms",
+      "family": "Gemma",
+      "description": "Portable GGUF. File identity must be verified separately on each device."
+    },
+    {
+      "id": "gemma-3-270m-q4km",
+      "displayName": "Gemma 3 270M Instruct · Q4_K_M",
+      "ollama": "hf.co/second-state/gemma-3-270m-it-GGUF:Q4_K_M",
+      "hfRepo": "second-state/gemma-3-270m-it-GGUF",
+      "gguf": "gemma-3-270m-it-Q4_K_M.gguf",
+      "weightLicense": "Google Gemma Terms",
+      "family": "Gemma",
+      "description": "Lower-memory catalog option; not certified on target phones."
+    }
+  ],
+  "rules": {
+    "listedDoesNotMeanDownloaded": true,
+    "downloadedDoesNotMeanWarm": true,
+    "inferenceDoesNotMeanGpu": true,
+    "receiptRequiredForProduction": true
+  }
+}

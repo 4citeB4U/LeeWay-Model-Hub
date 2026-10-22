@@ -78,6 +78,14 @@ The existing [LeeWay Edge GPU](https://github.com/4citeB4U/LeeWay-Edge-GPU) cont
 ```
 and implements `POST /v1/models/activate` and `POST /v1/generate`. That is a **provider-reported contract**, not proof of independent Veritas or actual GPU hardware qualification: separate evidence checks remain mandatory. Absent binding, GPU is **NOT QUALIFIED**, never silently replaced by CPU while labeled GPU.
 
+### Paired LeeWay GPU preview
+
+`LEEWAY_GPU_PREVIEW_URL` is a separate opt-in adapter for the paired Device Bridge preview API (`GET /v1/inference/status`, `GET /v1/models`, and `POST /v1/chat/completions`). Select **LeeWay GPU · paired workstation preview** explicitly in the Hub. It sends the catalog model's exact Ollama/Hugging Face tag through the LeeWay client and accepts a response only when the service reports `REMOTE_GPU_PREVIEW`, `UNADMITTED_PREVIEW`, a physical device, and `FULL_MODEL_IN_VRAM` with VRAM bytes at least as large as model bytes. The currently tested workstation runner is the LeeWay Ollama CUDA preview adapter; the UI exposes that runner name on each response. This path does not change `leeWayGpu.gpuInferenceQualified` or production admission.
+
+After a chat response, **Where the last answer ran** shows the selected route, provider-reported compute runtime/device/VRAM, authority state, and response time together. These fields describe that response only. `UNADMITTED_PREVIEW` stays visible, and provider headers do not substitute for independent host verification or production Veritas.
+
+For a single-device client installation that must never contact its local Ollama provider, set `MODEL_HUB_GPU_PREVIEW_ONLY=true` and configure `LEEWAY_GPU_PREVIEW_URL` to that device's loopback LeeWay GPU client. The Hub then offers no Ollama fallback and refuses every other backend. Bind the Hub to loopback. `MODEL_HUB_LOCAL_UI_SESSION=true` creates a random in-memory owner token for that loopback session and fills it into the same-origin UI; do not enable this when binding to a LAN or public interface. This path is an explicit model API, not a Windows-enumerated virtual GPU or a replacement for a signed WDDM driver. It remains a preview until the canonical Formula, LDWMD, Continuum, independent Veritas, receipt, and Learning Ledger gates are connected and accepted.
+
 ## Clients and mobile
 
 PocketPal's `pocketpal://hub/run` links are optional download-selection handoffs for offline phone-local models. They are **not** the cloud inference service. A phone without installed models can call an authorized LeeWay Model Hub runtime over the network through the same API. On disconnection, offline operation requires a local, separately installed model. Chat results are returned to the requesting client; no cross-device conversation database is asserted.

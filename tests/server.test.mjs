@@ -53,6 +53,19 @@ test('new server health does not announce a pre-warmed or GPU-qualified model',a
   assert.equal(st.leeWayGpu.gpuInferenceQualified,false);assert.equal(st.leeWayGpu.status,'UNBOUND');
  }finally{await s.close()}
 });
+test('local catalog asset route serves the same allowlist used by the API',async()=>{
+ const hub=createHub({catalog,token:'secret',fetchImpl:mock().fetchImpl}),s=await serve(hub);
+ try{
+  assert.deepEqual(await(await fetch(s.base+'/catalog/models.json')).json(),catalog);
+ }finally{await s.close()}
+});
+test('opt-in loopback session auto-fills only a bounded owner token in the local UI',async()=>{
+ const token='a'.repeat(43),hub=createHub({catalog,token,localUiSession:true,readUi:()=>'<input id="token" type="password" autocomplete="off" placeholder="Required for protected model controls">'}),s=await serve(hub);
+ try{
+  const html=await(await fetch(s.base+'/')).text();
+  assert.match(html,new RegExp('value="'+token+'"'));
+ }finally{await s.close()}
+});
 test('activation without bearer cannot change model',async()=>{
  const m=mock(),hub=createHub({catalog,token:'secret',fetchImpl:m.fetchImpl}),s=await serve(hub);
  try{
@@ -96,6 +109,81 @@ test('arbitrary unbound LeeWay GPU inference provider fails closed and never fal
   assert.equal(hub.getState().activeId,null);
  }finally{await s.close()}
 });
+function previewMock({fullVram=true}={}){
+ const calls=[];
+ const fetchImpl=async(url,opts={})=>{
+  const path=new URL(url).pathname;calls.push({url,path,body:opts.body?JSON.parse(opts.body):null});
+  if(path==='/v1/inference/status')return Response.json({available:[model.ollama],availableOk:true,
+   mode:'REMOTE_GPU_PREVIEW',backend:'paired LeeWay GPU workstation',authority:'UNADMITTED_PREVIEW'});
+  if(path==='/v1/models')return Response.json({object:'list',data:[{id:model.ollama,object:'model',owned_by:'leeway'}]});
+  if(path==='/v1/chat/completions')return Response.json({choices:[{message:{role:'assistant',content:'LEEWAY_GPU_PREVIEW_RESPONSE'}}]},
+   {headers:{'x-leeway-authority':'UNADMITTED_PREVIEW','x-leeway-execution-mode':'REMOTE_GPU_PREVIEW',
+    'x-leeway-gpu-backend':'Ollama CUDA preview','x-leeway-gpu-device':'NVIDIA GeForce RTX 5060 Laptop GPU',
+    'x-leeway-gpu-model-bytes':'879818178','x-leeway-gpu-vram-bytes':fullVram?'879818178':'700000000',
+    'x-leeway-gpu-residency':fullVram?'FULL_MODEL_IN_VRAM':'PARTIAL_MODEL_IN_VRAM'}});
+  return Response.json({error:'unexpected preview route'},{status:404});
+ };
+ return {fetchImpl,calls};
+}
+test('LeeWay GPU preview backend routes Model Hub catalog inference only through full remote VRAM evidence',async()=>{
+ const p=previewMock(),hub=createHub({catalog,token:'secret',fetchImpl:p.fetchImpl,gpuPreviewUrl:'http://gpu-preview'}),s=await serve(hub);
+ try{
+  const state=await(await fetch(s.base+'/v1/status')).json();
+  assert.equal(state.leeWayGpu.gpuInferenceQualified,false);
+  assert.equal(state.leeWayGpuPreview.available,true);
+  assert.equal(state.leeWayGpuPreview.authority,'UNADMITTED_PREVIEW');
+  const activated=await authorized(s.base,'/v1/models/activate',{modelId:model.id,backend:'LEEWAY_GPU_PREVIEW'});
+  assert.equal(activated.status,200);
+  const result=await authorized(s.base,'/v1/chat',{message:'Respond with the requested test phrase.'});
+  assert.equal(result.status,200);
+  const out=await result.json();
+  assert.equal(out.text,'LEEWAY_GPU_PREVIEW_RESPONSE');
+  assert.equal(out.backend,'LEEWAY_GPU_PREVIEW');
+  assert.equal(out.authority,'UNADMITTED_PREVIEW');
+  assert.equal(out.gpuClaim,'REMOTE_FULL_MODEL_IN_VRAM_PREVIEW');
+  assert.equal(out.modelBytes,out.vramBytes);
+  assert.equal(p.calls.some(c=>c.path.startsWith('/api/')),false,'preview must not call Ollama on the Hub host');
+  const models=await(await fetch(s.base+'/v1/models')).json();
+  assert.equal(models.models[0].executionLocation,'REMOTE_LEEWAY_GPU');
+  assert.equal(models.models[0].installed,true);
+ }finally{await s.close()}
+});
+test('LeeWay GPU preview rejects incomplete VRAM evidence and does not fall back',async()=>{
+ const p=previewMock({fullVram:false}),hub=createHub({catalog,token:'secret',fetchImpl:p.fetchImpl,gpuPreviewUrl:'http://gpu-preview'}),s=await serve(hub);
+ try{
+  assert.equal((await authorized(s.base,'/v1/models/activate',{modelId:model.id,backend:'LEEWAY_GPU_PREVIEW'})).status,200);
+  const result=await authorized(s.base,'/v1/chat',{message:'This must not fall back.'});
+  assert.equal(result.status,503);
+  assert.equal((await result.json()).error,'LEEWAY_GPU_PREVIEW_FULL_VRAM_REQUIRED');
+  assert.equal(p.calls.some(c=>c.path.startsWith('/api/')),false);
+ }finally{await s.close()}
+});
+test('LeeWay GPU preview refuses catalog models absent from the remote workstation allowlist',async()=>{
+ const p=previewMock(),hub=createHub({catalog,token:'secret',fetchImpl:p.fetchImpl,gpuPreviewUrl:'http://gpu-preview'}),s=await serve(hub);
+ try{
+  const absent=catalog.models.find(x=>x.ollama!==model.ollama);
+  const result=await authorized(s.base,'/v1/models/activate',{modelId:absent.id,backend:'LEEWAY_GPU_PREVIEW'});
+  assert.equal(result.status,409);
+  assert.equal((await result.json()).error,'MODEL_NOT_ALLOWLISTED_ON_REMOTE_LEEWAY_GPU');
+  assert.equal(p.calls.some(c=>c.path==='/v1/chat/completions'),false);
+ }finally{await s.close()}
+});
+test('GPU-preview-only Hub never contacts or falls back to host Ollama',async()=>{
+ const p=previewMock(),hub=createHub({catalog,token:'secret',fetchImpl:p.fetchImpl,
+  gpuPreviewUrl:'http://gpu-preview',gpuPreviewOnly:true}),s=await serve(hub);
+ try{
+  const state=await(await fetch(s.base+'/v1/status')).json();
+  assert.equal(state.gpuPreviewOnly,true);assert.equal(state.backend,'LEEWAY_GPU_PREVIEW');
+  const inventory=await(await fetch(s.base+'/v1/models')).json();
+  assert.equal(inventory.models[0].executionLocation,'REMOTE_LEEWAY_GPU');
+  const denied=await authorized(s.base,'/v1/models/activate',{modelId:model.id,backend:'OLLAMA'});
+  assert.equal(denied.status,403);
+  assert.equal((await authorized(s.base,'/v1/models/activate',{modelId:model.id,backend:'LEEWAY_GPU_PREVIEW'})).status,200);
+  const result=await authorized(s.base,'/v1/chat',{message:'Use only LeeWay GPU.'});
+  assert.equal(result.status,200);
+  assert.equal(p.calls.some(c=>c.path.startsWith('/api/')),false);
+ }finally{await s.close()}
+});
 test('CORS rejects unknown browser origins without mutation',async()=>{
  const m=mock(),hub=createHub({catalog,token:'secret',fetchImpl:m.fetchImpl,allowedOrigins:['https://trusted.example']}),s=await serve(hub);
  try{
@@ -122,6 +210,12 @@ test('input bounds and missing activation state enforced',async()=>{
 test('public model catalog matches the canonical service catalog',async()=>{
  const published=JSON.parse(await readFile(new URL('../public/catalog/models.json',import.meta.url),'utf8'));
  assert.deepEqual(published,catalog);
+});
+test('public widget labels per-response GPU preview evidence and its admission boundary',async()=>{
+ const html=await readFile(new URL('../public/index.html',import.meta.url),'utf8');
+ for(const label of ['Where the last answer ran','Provider-reported device','Provider-reported VRAM',
+  'GPU PREVIEW · NOT PRODUCTION-ADMITTED','No verified response','independent production admission is not established'])
+  assert.ok(html.includes(label),'Missing response evidence label: '+label);
 });
 test('portable client denies insecure non-localhost services',async()=>{
  const {createModelHubClient}=await import('../clients/model-hub-client.mjs');

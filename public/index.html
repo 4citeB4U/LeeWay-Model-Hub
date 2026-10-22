@@ -25,6 +25,8 @@ details{border-top:1px solid var(--border);margin-top:14px;padding-top:12px}summ
 .notice{padding:12px 14px;border:1px solid #426179;border-radius:10px;background:#122839;margin-top:10px;font-size:13px;color:#d6eef8}.notice.warn{border-color:#826e4a;background:#272217;color:#f9dfaf}
 .note{font-size:13px;color:var(--muted);margin-top:10px}.activity{margin:10px 0 0;font-size:13px;color:#bbe8ef;white-space:pre-wrap}.chat{height:285px;overflow:auto;background:#0b1522;border:1px solid var(--border);border-radius:12px;padding:10px}.message{padding:11px;border-bottom:1px solid #273b4c;white-space:pre-wrap;overflow-wrap:anywhere}.message strong{font-size:12px;display:block;color:#7ce4ed}.controls{display:flex;gap:10px;align-items:flex-end;margin-top:12px}.controls textarea{flex:1;min-width:0}.searchResults{max-height:300px;overflow:auto;margin-top:10px}.result{border-bottom:1px solid #2b4858;padding:12px 1px}.result strong{display:block;font-size:14px;overflow-wrap:anywhere}.result a{font-size:13px;color:#8bdfec;margin-right:14px}.result small{display:block}a{color:#8be4f1}footer{font-size:12px;color:var(--muted);padding:0 2px 22px}
 @media(max-width:680px){.shell{padding:11px}.grid,.two{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start}.controls{align-items:stretch}.controls button{align-self:flex-end}}
+.proof-card{border-color:#365b6b;background:linear-gradient(145deg,rgba(22,43,58,.98),rgba(14,25,38,.98))}.proof-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}.proof-head h2{margin-bottom:4px}.proof-badge{display:inline-flex;align-items:center;justify-content:center;border:1px solid #476678;border-radius:999px;padding:7px 11px;font-size:11px;letter-spacing:.04em;font-weight:800;text-align:center;color:#bed4df;background:#102332}.proof-badge[data-state="running"]{color:#b8f1fa;border-color:#3c9bab;background:#10313c}.proof-badge[data-state="preview"]{color:#ffe2a6;border-color:#a57c3d;background:#332817}.proof-badge[data-state="reported"]{color:#c9f0d1;border-color:#548666;background:#172b20}.proof-badge[data-state="failed"]{color:#ffc5bd;border-color:#a9554b;background:#321d1c}.proof-flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1.25fr);align-items:stretch;gap:9px}.proof-node{min-width:0;padding:13px;border:1px solid #345164;border-radius:12px;background:#0c1926}.proof-node span,.proof-fact span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.proof-node strong,.proof-fact strong{display:block;margin-top:5px;font-size:14px;overflow-wrap:anywhere}.proof-arrow{align-self:center;color:#79d9e5;font-size:20px;font-weight:700}.proof-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:10px}.proof-fact{min-width:0;padding:11px 12px;border:1px solid #2b4658;border-radius:11px;background:rgba(8,19,30,.72)}.proof-summary{margin:12px 0 0;color:#d1e2e9;font-size:13px}.proof-foot{margin-top:8px;font-size:12px;color:var(--muted)}
+@media(max-width:680px){.proof-head{flex-direction:column}.proof-flow{grid-template-columns:1fr}.proof-arrow{justify-self:center;transform:rotate(90deg);line-height:1}.proof-facts{grid-template-columns:1fr 1fr}}
 </style></head>
 <body><main class="shell">
 <header class="header"><div><h1>◉ LeeWay Model Hub</h1><div class="sub">One selected model · one inference service · all LeeWay devices</div></div><div class="badge" id="serviceBadge" aria-live="polite">Checking LeeWay service</div></header>
@@ -42,13 +44,30 @@ details{border-top:1px solid var(--border);margin-top:14px;padding-top:12px}summ
 <div class="grid">
 <section class="card"><h2>Active LeeWay model</h2>
 <label for="model">Choose from the LeeWay model registry</label><select id="model" aria-label="Select a model"><option value="">Loading models…</option></select>
+<label for="backend" style="margin-top:10px">Inference path</label><select id="backend" aria-label="Select inference path"><option value="">Choosing available path…</option></select>
 <div id="modelStatus" class="note">Loading public catalog…</div>
 <div id="activationNotice" class="activity"></div>
 <div class="row" style="margin-top:12px"><button id="activate" type="button" disabled>Use selected model</button><a id="pocketpal" href="https://pocketpal.dev/" target="_blank" rel="noopener noreferrer">PocketPal mobile options</a></div>
-<div class="note">Choosing a model is lightweight. Only the selected model runs on the authorized compute host. Listed models are not necessarily downloaded or loaded.</div>
+<div class="note">LeeWay GPU preview sends requests to the paired workstation and requires the entire model in its GPU VRAM. The HP does not run inference through its CPU or Intel graphics in this mode. Preview is not production admission or a Windows-enumerated virtual GPU for arbitrary apps.</div>
 </section>
-<section class="card"><h2>Execution status</h2><div id="status" class="notice">Discovering service…</div><div class="note" id="gpuStatus">GPU evidence is checked separately from the model catalog.</div></section>
+<section class="card"><h2>Service connection</h2><div id="status" class="notice">Discovering service…</div><div class="note" id="gpuStatus">GPU evidence is checked separately from the model catalog.</div></section>
 </div>
+<section class="card proof-card" aria-labelledby="proofTitle">
+<div class="proof-head"><div><h2 id="proofTitle">Where the last answer ran</h2><p class="sub">Request-specific route and compute evidence returned by the inference service.</p></div><span id="proofBadge" class="proof-badge" data-state="idle" aria-live="polite">No request yet</span></div>
+<div id="executionProof" class="proof-flow" data-state="idle" aria-label="Inference route">
+<div class="proof-node"><span>Model</span><strong id="proofModel">No request yet</strong></div><div class="proof-arrow" aria-hidden="true">→</div>
+<div class="proof-node"><span>LeeWay route</span><strong id="proofRoute">Waiting for a response</strong></div><div class="proof-arrow" aria-hidden="true">→</div>
+<div class="proof-node"><span>Compute runtime</span><strong id="proofRuntime">Not reported</strong></div>
+</div>
+<div class="proof-facts">
+<div class="proof-fact"><span>Provider-reported device</span><strong id="proofDevice">Not reported</strong></div>
+<div class="proof-fact"><span>Provider-reported VRAM</span><strong id="proofResidency">Not measured</strong></div>
+<div class="proof-fact"><span>Authority</span><strong id="proofAuthority">Not applicable</strong></div>
+<div class="proof-fact"><span>Response time</span><strong id="proofDuration">—</strong></div>
+</div>
+<p id="proofSummary" class="proof-summary">Send a prompt to capture which LeeWay route answered and what runtime/device evidence it reported.</p>
+<p class="proof-foot">A preview receipt describes this request only. It does not certify production admission or a Windows virtual GPU.</p>
+</section>
 <section class="card"><h2>Model conversation</h2><div class="chat" id="chat" aria-live="polite"><div class="message"><strong>LeeWay</strong>Select a model. Chat becomes available after connection to the authorized inference host.</div></div>
 <div class="controls"><textarea id="prompt" rows="2" placeholder="Ask your selected model…" disabled></textarea><button type="button" id="send" disabled>Send</button></div>
 </section>
@@ -71,6 +90,7 @@ const setReady=()=>{
  $('activate').disabled=!permitted;
  $('send').disabled=!permitted||!active;
  $('prompt').disabled=!permitted||!active;
+ $('backend').disabled=!service||busy;
 };
 const errorLabel=e=>e?.message==='API_NOT_JSON'?'The address is a website, not a LeeWay model API.':String(e?.message||e);
 const safeEndpoint=value=>{
@@ -112,9 +132,24 @@ function modelChanged(auto=true){
   $('pocketpal').removeAttribute('target');
  }else{$('pocketpal').href='https://pocketpal.dev/';$('pocketpal').textContent='PocketPal model downloads';$('pocketpal').target='_blank';}
  const mstate=installed.get(m?.id);
- $('modelStatus').textContent=m?(m.displayName+' · '+(mstate?.installed?'Installed on host':service?'Not installed on host':'Installation not verified')+' · '+(mstate?.loaded?'Warm':'Not warm')):'No available model';
+ const location=mstate?.executionLocation==='REMOTE_LEEWAY_GPU'?'Available on paired LeeWay GPU':
+  (mstate?.installed?'Installed on inference host':service?'Not installed on inference host':'Installation not verified');
+ const warmth=mstate?.loaded===true?'Warm':mstate?.loaded===false?'Not warm':'Warmth checked on first request';
+ $('modelStatus').textContent=m?(m.displayName+' · '+location+' · '+warmth):'No available model';
  $('activationNotice').textContent=active===m?.id?'This model is selected on the connected host.':service?'Choose a model to activate it on the service.':'Models available for discovery; inference host not connected.';
  if(auto&&service&&$('token').value.trim()&&m?.id&&m.id!==active) activate();
+}
+function fillBackends(s){
+ const select=$('backend'),prior=select.value,options=[];
+ if(s.leeWayGpuPreview?.available||s.gpuPreviewOnly)options.push({value:'LEEWAY_GPU_PREVIEW',label:s.leeWayGpuPreview?.available?
+  'LeeWay GPU · paired workstation preview (unadmitted)':'LeeWay GPU · unavailable (no fallback)',disabled:!s.leeWayGpuPreview?.available});
+ if(!s.gpuPreviewOnly&&s.leeWayGpu?.gpuInferenceQualified)options.push({value:'LEEWAY_GPU',label:'LeeWay GPU · qualified provider'});
+ if(!s.gpuPreviewOnly)options.push({value:'OLLAMA',label:'Host Ollama'});
+ select.replaceChildren(...options.map(x=>{const o=document.createElement('option');o.value=x.value;o.textContent=x.label;o.disabled=!!x.disabled;return o}));
+ select.value=options.some(x=>x.value===prior)?prior:
+  (s.gpuPreviewOnly?'LEEWAY_GPU_PREVIEW':s.activeModel&&options.some(x=>x.value===s.backend)?s.backend:
+   options.some(x=>x.value==='LEEWAY_GPU_PREVIEW')?'LEEWAY_GPU_PREVIEW':
+   options.some(x=>x.value==='LEEWAY_GPU')?'LEEWAY_GPU':'OLLAMA');
 }
 async function publicCatalog(){
  try{
@@ -131,12 +166,16 @@ async function discover(){
   const [c,s,list]=await Promise.all([api('/v1/catalog'),api('/v1/status'),api('/v1/models')]);
   if(!Array.isArray(c.models))throw Error('Invalid model catalog returned.');
   service=true;status=s;active=s.activeModel;
+  fillBackends(s);
   catalog=c.models;installed=new Map((list.models||[]).map(m=>[m.id,m]));
   fillModels();
   $('serviceBadge').textContent=active?'Model ready: '+active:'Service connected';
   say('Connected to the LeeWay Model Hub. '+(active?'The selected model is ready to receive requests.':'Select a model for inference.'));
   $('status').textContent='Service: connected\nBackend: '+(s.backend||'unknown')+'\nActive model: '+(active||'none');
-  $('gpuStatus').textContent='LeeWay GPU inference: '+(s.leeWayGpu?.status||'NOT_REPORTED')+(s.leeWayGpu?.gpuInferenceQualified?' (provider reports qualified)':' · no physical LLM GPU proof');
+  const preview=s.leeWayGpuPreview;
+  $('gpuStatus').textContent='Production GPU provider: '+(s.leeWayGpu?.status||'NOT_REPORTED')+
+   (s.leeWayGpu?.gpuInferenceQualified?' · qualified contract reported':' · not production-qualified')+
+   '\nLeeWay GPU preview: '+(preview?.available?'connected · '+preview.mode+' · UNADMITTED_PREVIEW':'not connected · '+(preview?.status||'NOT_REPORTED'));
  }catch(e){
   service=false;active=null;$('serviceBadge').textContent='Model discovery only';
   say('Model registry available. Inference host is not connected: '+errorLabel(e),true);
@@ -149,18 +188,52 @@ async function activate(){
  const id=$('model').value;if(!id)return;
  busy=true;setReady();$('activationNotice').textContent='Activating one model on the LeeWay service…';
  try{
-  const backend=status.leeWayGpu?.gpuInferenceQualified===true?'LEEWAY_GPU':'OLLAMA';
+  const backend=$('backend').value;
   const r=await api('/v1/models/activate','POST',{modelId:id,backend});
   active=r.selected;$('activationNotice').textContent='Active: '+active+' · '+r.backend;
   await discover();
  }catch(e){$('activationNotice').textContent='Model not activated: '+errorLabel(e);}finally{busy=false;setReady();}
 }
 function message(kind,text){const el=document.createElement('div');el.className='message';const label=document.createElement('strong');label.textContent=kind;el.append(label,document.createTextNode(text));$('chat').append(el);$('chat').scrollTop=$('chat').scrollHeight;}
+const formatBytes=n=>Number.isSafeInteger(n)&&n>0?(n/1048576).toFixed(0)+' MiB':'Not reported';
+function proofPending(modelId,backend){
+ $('proofBadge').dataset.state='running';$('proofBadge').textContent='Request in flight';
+ $('executionProof').dataset.state='running';$('proofModel').textContent=modelId||'Selected model';
+ $('proofRoute').textContent=backend==='LEEWAY_GPU_PREVIEW'?'LeeWay GPU preview · no fallback':backend||'Selected LeeWay route';
+ $('proofRuntime').textContent='Waiting for response evidence';$('proofDevice').textContent='Waiting for response evidence';
+ $('proofResidency').textContent='Waiting for response evidence';$('proofAuthority').textContent='Not returned yet';$('proofDuration').textContent='—';
+ $('proofSummary').textContent='The request is running. This panel will update from the response that actually returns.';
+}
+function proofSuccess(r){
+ const preview=r.backend==='LEEWAY_GPU_PREVIEW';
+ const full=preview&&r.residency==='FULL_MODEL_IN_VRAM'&&Number.isSafeInteger(r.modelBytes)&&Number.isSafeInteger(r.vramBytes)&&r.vramBytes>=r.modelBytes;
+ $('proofBadge').dataset.state=preview?'preview':'reported';
+ $('proofBadge').textContent=preview?'GPU PREVIEW · NOT PRODUCTION-ADMITTED':'Provider response · inspect evidence below';
+ $('executionProof').dataset.state=preview?'preview':'reported';
+ $('proofModel').textContent=r.modelId||'Not returned';
+ $('proofRoute').textContent=preview?'LeeWay GPU preview · no fallback':(r.backend||'LeeWay provider');
+ $('proofRuntime').textContent=r.physicalBackend||r.backend||'Not returned';
+ $('proofDevice').textContent=r.device||'No physical device identifier returned';
+ $('proofResidency').textContent=preview?(full?'FULL_MODEL_IN_VRAM · '+formatBytes(r.modelBytes)+' / '+formatBytes(r.vramBytes):'Full VRAM evidence incomplete'):
+  (r.vramBytesReported!=null?'Upstream reported '+formatBytes(r.vramBytesReported)+' in GPU VRAM':'Not established for this response');
+ $('proofAuthority').textContent=r.authority||'Not supplied';
+ $('proofDuration').textContent=Number.isFinite(r.elapsedMs)?r.elapsedMs+' ms':'Not returned';
+ $('proofSummary').textContent=preview?
+  (full?'The Hub accepted this response after the paired provider reported full model VRAM residency. Runtime and hardware fields are provider-reported preview evidence; independent production admission is not established.':'The response arrived, but the required full-VRAM fields were incomplete. Do not treat it as GPU-verified.'):
+  'This model answered through the selected provider. No LeeWay GPU claim is made unless the response evidence above explicitly reports one.';
+}
+function proofFailure(modelId,backend,error){
+ $('proofBadge').dataset.state='failed';$('proofBadge').textContent='No verified response';$('executionProof').dataset.state='failed';
+ $('proofModel').textContent=modelId||'Not returned';$('proofRoute').textContent=backend==='LEEWAY_GPU_PREVIEW'?'LeeWay GPU preview · no fallback':backend||'Selected LeeWay route';
+ $('proofRuntime').textContent='No runtime evidence';$('proofDevice').textContent='No device evidence';$('proofResidency').textContent='No residency evidence';$('proofAuthority').textContent='No response';$('proofDuration').textContent='—';
+ $('proofSummary').textContent='Request failed: '+errorLabel(error)+'. No verified model response was returned; the Hub did not silently switch compute routes.';
+}
 async function chat(){
  const msg=$('prompt').value.trim();if(!msg||!service||!active||busy)return;
- busy=true;setReady();$('prompt').value='';message('You',msg);
- try{const r=await api('/v1/chat','POST',{message:msg});message(r.modelId+' · '+r.backend,r.text);$('status').textContent='Model: '+r.modelId+'\nBackend: '+r.backend+'\nResponse: '+r.elapsedMs+' ms\nGPU: '+(r.gpuClaim||'NOT_PROVEN');}
- catch(e){message('LeeWay', 'Request could not be completed: '+errorLabel(e));}
+ const requestedBackend=$('backend').value||status.backend||'UNKNOWN';
+ busy=true;setReady();$('prompt').value='';message('You',msg);proofPending(active,requestedBackend);
+ try{const r=await api('/v1/chat','POST',{message:msg});message(r.modelId+' · '+r.backend,r.text);proofSuccess(r);}
+ catch(e){message('LeeWay', 'Request could not be completed: '+errorLabel(e));proofFailure(active,requestedBackend,e);}
  finally{busy=false;setReady();}
 }
 function clearResults(){const r=$('results');r.replaceChildren();return r;}
@@ -190,6 +263,7 @@ $('connect').addEventListener('click',async()=>{
 });
 $('refresh').onclick=discover;$('activate').onclick=activate;$('send').onclick=chat;
 $('model').onchange=()=>modelChanged(true);$('token').addEventListener('input',setReady);
+$('backend').onchange=()=>modelChanged(false);
 $('searchBtn').onclick=search;$('search').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
 $('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chat()}});
 await publicCatalog();await discover();

@@ -12,17 +12,21 @@
 name: Model Hub Checks
 on:
   push:
-    branches: [main]
+    branches: [main, codex/leeway-gpu-qualified-client]
   pull_request:
 jobs:
   contracts:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
       - run: npm test
       - run: npm run check

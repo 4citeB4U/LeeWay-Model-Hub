@@ -31,10 +31,13 @@ const fixture=(options={})=>{
         const result={serviceId:'leeway.gpu.service',modelId:body.modelId,backend:'LEEWAY_GPU',
           requestId:body.requestId,sessionId:body.sessionId,text:'fixture-output',
           execution:'LEEWAY_QUANTIZED_WGSL_GRAPH',canonicalReceiptIssued:true,
-          modelGraphTimings:{schema:'leeway.gpu.model-graph-timings.v1',
+          modelGraphTimings:{schema:'leeway.gpu.model-graph-timings.v2',
             scope:'MODEL_GRAPH_AFTER_LOAD_EXCLUDES_AUTHORIZATION_POST_VERITAS_AND_CONTINUUM_COMMIT',
-            modelLoadMs:12,prefillMs:4,timeToFirstTokenMs:4,decodeMs:1,totalInferenceMs:5,
-            promptTokens:3,visibleOutputTokens:1,tokenTimings:[{position:2,commands:8,elapsedMs:4}]},
+            modelLoadState:'COLD_LOAD',modelLoadMs:12,prefillMs:4,modelGraphFirstTokenReadyMs:4,
+            clientTimeToFirstTokenMs:null,clientTimeToFirstTokenStatus:'NOT_MEASURED_NON_STREAMING_RESPONSE',
+            decodeMs:0,decodeModelSteps:0,decodeVisibleTokens:0,decodeStopTokens:0,decodeTokensPerSecond:null,
+            graphAfterLoadMs:5,modelLoadAndGraphMs:17,
+            promptTokens:3,visibleOutputTokens:1,tokenTimings:Array.from({length:3},(_,position)=>({position,commands:8,elapsedMs:4}))},
           executionBinding:{requestId:body.requestId,sessionId:body.sessionId,
             ...Object.fromEntries(hashes.map(key=>[key,'a'.repeat(64)]))}};
         options.mutateResult?.(result);
@@ -81,8 +84,10 @@ test('authenticated qualified route preserves fresh request, session, and comple
   assert.equal(response.status,200);const answer=await response.json();
   assert.equal(answer.requestId,'request-1');assert.equal(answer.sessionId,activation.sessionId);
   assert.equal(answer.gpuClaim,'TRUSTED_CONSUMER_VERIFIED_REQUEST');
-  assert.equal(answer.modelGraphTimings.totalInferenceMs,5);
-  assert.equal(answer.modelGraphTimings.tokenTimings[0].position,2);
+  assert.equal(answer.modelGraphTimings.graphAfterLoadMs,5);
+  assert.equal(answer.modelGraphTimings.modelLoadAndGraphMs,17);
+  assert.equal(answer.modelGraphTimings.tokenTimings[0].position,0);
+  assert.equal(answer.modelGraphTimings.tokenTimings.at(-1).position,2);
   assert.equal(answer.executionBinding.commitAttestationSha256,'a'.repeat(64));
   assert.equal(answer.executionBinding.learningLedgerReceiptSha256,'a'.repeat(64));
   assert.equal(f.verifiedResults.length,1);assert.equal(f.verifiedResults[0].clientId,'model-hub-fixture');

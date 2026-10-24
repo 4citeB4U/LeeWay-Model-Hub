@@ -37,7 +37,7 @@ Vercel = optional HTTPS API/router (only with an approved reachable backend)
                   |
              Provider selection (one active model)
                   +-- Ollama/llama.cpp on an authorized persistent host (implemented)
-                  +-- LeeWay GPU inference provider (contract only; not bound)
+                  +-- LeeWay GPU inference provider (qualified consumer implemented; trusted binding required)
                   |
       Pocket Agent Lee / SlowLane / LeeWay Logistics / desktop browser / iPhone
 ```
@@ -70,13 +70,41 @@ The service binds only to loopback by default. When serving other devices, use a
 
 `MODEL_HUB_TOKEN` is required. The inference provider accepts **only models in catalog/models.json**. Third-party Hugging Face/Gemma licenses govern weight files separately.
 
-## GPU boundary
+## Qualified LeeWay GPU consumer
 
-The existing [LeeWay Edge GPU](https://github.com/4citeB4U/LeeWay-Edge-GPU) contains WebGPU shaders, browser-native dispatchers and standalone acceptance classifiers. Its `g19-standalone-gpu-acceptance.mjs` explicitly distinguishes GPU component execution from independently verified GPU provider/LLM inference. The API accepts a configured future `LEEWAY_GPU_INFERENCE_URL` only if it returns `GET /v1/capabilities` with:
+The Hub consumes the existing **LeeWay Edge GPU** service identity, `leeway.gpu.service`, through `/v1/capabilities`, `/v1/models/activate`, and `/v1/generate`. The consumer implementation is `src/qualified-gpu-client.mjs`. Its contract is portable: an explicitly configured HTTPS endpoint works across hosts; HTTP is limited to loopback development. Credential-bearing URLs, query strings, redirects, and provider addresses supplied through request JSON are rejected. Trusted startup must provide client authentication and independent qualification and result verifiers; without them the provider stays unavailable. These callbacks are not accepted from API requests or environment booleans.
+
+Trusted deployment startup supplies these functions to `createHub(...)` or `start(...)`:
+
+- `authenticateGpuRequest({operation, endpoint, modelId?, requestId?, sessionId?})` returns `{clientId, headers}`. Only `authorization` or `x-leeway-client-proof` headers are accepted. The existing startup-only `gpuToken` remains an alternative authentication adapter with client identity `leeway.model-hub`.
+- `verifyGpuQualification({capabilities, endpoint, clientId})` independently verifies the existing issuer's qualification, trusted source/model identities, scope, freshness, and revocation. It must return primitive `true` after verification. Shape checks and `gpuVerified:true` are insufficient.
+- `verifyGpuResult({request, result, qualification, endpoint, clientId})` independently verifies the exact request, authenticated client, decoded output, model/tokenizer/implementation identities, Formula and replay receipts, LDWMD lease, Continuum readback, POST, commit attestation, Receipt Ledger and Learning Ledger evidence. It must return primitive `true` after verification.
+
+Missing authentication or either verifier keeps the qualified route unavailable. These adapters are injected by the trusted host; the Hub neither creates signing keys nor issues grants. Running the ordinary CLI with only a GPU URL and token does not qualify a provider.
+
+Activation validates the service, model, backend and `SELECTED_NO_MODEL_EXECUTION` response before changing the selected model. It creates a Hub session ID without claiming that model weights are warm. Every generation rechecks qualification, sends a fresh request ID and the selected session ID, correlates the full returned `executionBinding`, and preserves that evidence in the response after independent verification. Inference and model switching are serialized, and a disconnected HTTP caller cancels the provider request. Optional `/v1/chat` fields are `requestId`, `sessionId`, and `maxNewTokens` (1–64); a foreign session is rejected. Provider authentication material never enters request JSON.
+
+When `LEEWAY_GPU` is selected, `/v1/models` reports the qualified provider's catalog rather than querying Ollama. Installation and residency remain unknown unless separately observed. A failed GPU activation or request retains the selected backend and reports failure; it does not execute another provider.
+
+Set `MODEL_HUB_GPU_REQUIRED=true` for an explicitly qualified-GPU-only deployment. It selects `LEEWAY_GPU` as the initial route and rejects Ollama and preview activation. It cannot be combined with `MODEL_HUB_GPU_PREVIEW_ONLY`. Without that setting, the original initial route and explicitly selected preview modes remain available. Omitting a backend during a later activation retains the current route.
+
+The focused tests use synthetic upstream and verification fixtures. They establish consumer correlation and rejection behavior; they do not establish physical model execution or canonical production admission.
+
+### Provider discovery contract
+
+The existing [LeeWay Edge GPU](https://github.com/4citeB4U/LeeWay-Edge-GPU) exposes a configured `LEEWAY_GPU_INFERENCE_URL` through the following discovery shape, which the trusted consumer verifier must independently qualify:
 ```json
-{"schema":"leeway.gpu.inference.v1","modelInference":true,"gpuVerified":true,"receiptId":"external-real-receipt","models":["gemma-3-1b-q4km"]}
+{"schema":"leeway.gpu.inference.v1","serviceId":"leeway.gpu.service","modelInference":true,"gpuVerified":true,"receiptId":"qualification-reference","models":["gemma-3-1b-q4km"]}
 ```
-and implements `POST /v1/models/activate` and `POST /v1/generate`. That is a **provider-reported contract**, not proof of independent Veritas or actual GPU hardware qualification: separate evidence checks remain mandatory. Absent binding, GPU is **NOT QUALIFIED**, never silently replaced by CPU while labeled GPU.
+The provider also implements `POST /v1/models/activate` and `POST /v1/generate`. Discovery remains a provider report until the trusted verifier accepts it; each generated response requires its own independently verified execution evidence.
+
+### Paired LeeWay GPU preview
+
+`LEEWAY_GPU_PREVIEW_URL` is a separate opt-in adapter for the paired Device Bridge preview API (`GET /v1/inference/status`, `GET /v1/models`, and `POST /v1/chat/completions`). Select **LeeWay GPU · paired workstation preview** explicitly in the Hub. It sends the catalog model's exact Ollama/Hugging Face tag through the LeeWay client and accepts a response only when the service reports `REMOTE_GPU_PREVIEW`, `UNADMITTED_PREVIEW`, a physical device, and `FULL_MODEL_IN_VRAM` with VRAM bytes at least as large as model bytes. The currently tested workstation runner is the LeeWay Ollama CUDA preview adapter; the UI exposes that runner name on each response. This path does not change `leeWayGpu.gpuInferenceQualified` or production admission.
+
+After a chat response, **Where the last answer ran** shows the selected route, provider-reported compute runtime/device/VRAM, authority state, and response time together. These fields describe that response only. `UNADMITTED_PREVIEW` stays visible, and provider headers do not substitute for independent host verification or production Veritas.
+
+For a single-device client installation that must never contact its local Ollama provider, set `MODEL_HUB_GPU_PREVIEW_ONLY=true` and configure `LEEWAY_GPU_PREVIEW_URL` to that device's loopback LeeWay GPU client. The Hub then offers no Ollama fallback and refuses every other backend. Bind the Hub to loopback. `MODEL_HUB_LOCAL_UI_SESSION=true` creates a random in-memory owner token for that loopback session and fills it into the same-origin UI; do not enable this when binding to a LAN or public interface. This path is an explicit model API, not a Windows-enumerated virtual GPU or a replacement for a signed WDDM driver. It remains a preview until the canonical Formula, LDWMD, Continuum, independent Veritas, receipt, and Learning Ledger gates are connected and accepted.
 
 ## Clients and mobile
 

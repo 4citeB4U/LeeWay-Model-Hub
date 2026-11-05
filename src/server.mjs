@@ -122,7 +122,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
   };
   const warmPoolStatus=async()=>{
     const requestedModelIds=[...requestedWarmIds];
-    if(provider!=='OLLAMA')return {state:'OTHER_BACKEND',targetMaxModels:maxWarmModels,
+    if(provider!=='OLLAMA'||requestedModelIds.length===0)return {state:provider==='OLLAMA'?'NOT_REQUESTED':'OTHER_BACKEND',targetMaxModels:maxWarmModels,
       requestedModelIds,observedLoadedModelIds:null,keepAlive};
     try{
       const observed=await ollama('/api/ps',{timeout:8000});
@@ -181,16 +181,9 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
     if(!bounded(message,6000))throw Object.assign(Error('INVALID_MESSAGE'),{code:400});
     busy=true;
     try{
-    const {modelId:requestedModelId,...providerOptions}=options&&typeof options==='object'&&!Array.isArray(options)?options:{};
-    const targetModelId=requestedModelId??activeId;
-    if(!choices.has(targetModelId))throw Object.assign(Error('MODEL_NOT_ALLOWLISTED'),{code:400});
-    if(targetModelId!==activeId){
-      if(provider!=='OLLAMA')throw Object.assign(Error('MODEL_SESSION_MISMATCH'),{code:409});
-      const warm=await warmPoolStatus();
-      if(!Array.isArray(warm.observedLoadedModelIds)||!warm.observedLoadedModelIds.includes(targetModelId))
-        throw Object.assign(Error('MODEL_NOT_OBSERVED_WARM'),{code:409});
-    }
-    const model=choices.get(targetModelId);
+    // Preserve canonical single-selected-model inference admission. The separate
+    // draft model-slot gate is selection-only and not an execution authorization.
+    const model=choices.get(activeId);
     const start=performance.now();
     if(provider==='LEEWAY_GPU_PREVIEW'){
       const result=await callResult(gpuPreviewUrl,'/v1/chat/completions',{method:'POST',body:{
@@ -218,11 +211,11 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
     if(provider==='LEEWAY_GPU'){
       if(!gpuSession)throw Object.assign(Error('GPU_ACTIVATION_REQUIRED'),{code:503});
       if(!options||typeof options!=='object'||Array.isArray(options)||
-        Object.keys(providerOptions).some(key=>!['requestId','sessionId','maxNewTokens'].includes(key)))
+        Object.keys(options).some(key=>!['requestId','sessionId','maxNewTokens'].includes(key)))
         throw Object.assign(Error('GPU_REQUEST_OPTIONS_INVALID'),{code:400});
       if(options.sessionId!==undefined&&options.sessionId!==gpuSession.sessionId)
         throw Object.assign(Error('GPU_SESSION_MISMATCH'),{code:400});
-      const answer=await qualifiedGpu.generate({modelId:activeId,prompt:message,...providerOptions,sessionId:gpuSession.sessionId},
+      const answer=await qualifiedGpu.generate({modelId:activeId,prompt:message,...options,sessionId:gpuSession.sessionId},
         {expectedClientId:gpuSession.clientId,signal});
       return {...answer,elapsedMs:Math.round(performance.now()-start),gpuClaim:'TRUSTED_CONSUMER_VERIFIED_REQUEST'};
     }
@@ -233,7 +226,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
     if(!bounded(text,12000))throw Error('MODEL_GENERATED_NO_USABLE_TEXT');
     const inv=await ollama('/api/ps',{timeout:8000}).catch(()=>({models:[]}));
     const vram=(inv.models||[]).find(m=>m.name===model.ollama)?.size_vram??null;
-    return {modelId:targetModelId,backend:'OLLAMA',text,elapsedMs:Math.round(performance.now()-start),
+    return {modelId:activeId,backend:'OLLAMA',text,elapsedMs:Math.round(performance.now()-start),
       tokenCount:reply.eval_count??null,vramBytesReported:vram,
       gpuClaim:vram>0?'UPSTREAM_VRAM_REPORTED_NOT_INDEPENDENTLY_VERIFIED':'NOT_PROVEN'};
     }finally{busy=false;}
@@ -272,7 +265,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
         body=JSON.parse(input||'{}');
       }catch{return json(res,400,{error:'INVALID_JSON_OR_TOO_LARGE'},origin,allowed);}
       try{
-        const allowedFields=new Set(url.pathname==='/v1/models/activate'?['modelId','backend']:['message','modelId','requestId','sessionId','maxNewTokens']);
+        const allowedFields=new Set(url.pathname==='/v1/models/activate'?['modelId','backend']:['message','requestId','sessionId','maxNewTokens']);
         if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).some(key=>!allowedFields.has(key)))
           return json(res,400,{error:'REQUEST_FIELD_UNSUPPORTED'},origin,allowed);
         const abortController=new AbortController();
@@ -281,7 +274,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
         res.once('close',()=>{if(!res.writableEnded)abort();});
         const value=url.pathname==='/v1/models/activate'?
           await select(body.modelId,body.backend??provider):
-          await infer(body.message,Object.fromEntries(['modelId','requestId','sessionId','maxNewTokens'].filter(key=>body[key]!==undefined).map(key=>[key,body[key]])),
+          await infer(body.message,Object.fromEntries(['requestId','sessionId','maxNewTokens'].filter(key=>body[key]!==undefined).map(key=>[key,body[key]])),
             {signal:abortController.signal});
         return json(res,200,value,origin,allowed);
       }catch(e){return json(res,e.code||502,{error:safeError(e)},origin,allowed);}

@@ -65,9 +65,10 @@ The existing Hub did not have a qualified local-model import action. The bounded
 Owner-local Windows example (use the **real** existing file path and its independently calculated hash):
 
 ```powershell
-$ModelFile = 'E:\My-Approved-Models\research-v1.gguf'
-$ActualSha = (Get-FileHash -Path $ModelFile -Algorithm SHA256).Hash.ToLowerInvariant()
-npm run import:local:gguf -- --import-root 'E:\My-Approved-Models' --file $ModelFile --id 'research-v1' --display-name 'Research model v1' --license 'Creator-reviewed model license' --expected-sha256 $ActualSha
+$ImportRoot = Read-Host 'Absolute path of the approved local import directory'
+$ModelFile = Read-Host 'Absolute path to an existing GGUF file in that directory'
+$ActualSha = (Get-FileHash -LiteralPath $ModelFile -Algorithm SHA256).Hash.ToLowerInvariant()
+npm run import:local:gguf -- --import-root $ImportRoot --file $ModelFile --id 'research-v1' --display-name 'Research model v1' --license 'Creator-reviewed model license' --expected-sha256 $ActualSha
 # Review the PREFLIGHT_ONLY result before any mutation.
 # Repeat the exact command with --apply only after Creator approval.
 ```

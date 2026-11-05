@@ -66,12 +66,17 @@ test('two registered installed models remain warm across switching and are indep
   assert.equal(state.warmPool.state,'UPSTREAM_REPORTED_NOT_INDEPENDENTLY_VERIFIED');
   assert.deepEqual(state.warmPool.observedLoadedModelIds,[models[0].id,models[1].id]);
   assert.equal(state.warmPool.keepAlive,-1);
-  const a=await post(s.base,'/v1/chat',{message:'bounded task from worker A',modelId:models[0].id});
   const b=await post(s.base,'/v1/chat',{message:'bounded task from worker B'});
-  assert.equal(a.status,200);assert.equal(b.status,200);
-  assert.equal((await a.json()).modelId,models[0].id);
+  assert.equal(b.status,200);
   assert.equal((await b.json()).modelId,models[1].id);
-  assert.equal(hub.getState().activeId,models[1].id);
+  const reselect=await post(s.base,'/v1/models/activate',{modelId:models[0].id});
+  assert.equal(reselect.status,200);
+  assert.equal(u.warm.size,2,'switching back does not unload the other warm model');
+  assert.equal(u.calls.filter(c=>c.body?.keep_alive===0).length,0);
+  const a=await post(s.base,'/v1/chat',{message:'bounded task from worker A'});
+  assert.equal(a.status,200);
+  assert.equal((await a.json()).modelId,models[0].id);
+  assert.equal(hub.getState().activeId,models[0].id);
  }finally{await s.close()}
 });
 test('third selection only releases least-recently requested model after warming the replacement',async()=>{
@@ -84,7 +89,7 @@ test('third selection only releases least-recently requested model after warming
   assert.equal(lastTwo[0].body.keep_alive,-1);
   assert.equal(lastTwo[1].body.model,models[0].ollama);
   assert.equal(lastTwo[1].body.keep_alive,0);
-  assert.equal((await post(s.base,'/v1/chat',{message:'do not revive model A',modelId:models[0].id})).status,409);
+  assert.equal((await post(s.base,'/v1/chat',{message:'alternate model not authorized',modelId:models[0].id})).status,400);
   assert.equal(u.warm.size,2);
   assert.equal(hub.getState().activeId,models[2].id);
  }finally{await s.close()}
@@ -108,7 +113,8 @@ test('missing upstream residency observer cannot be presented as warm availabili
   const status=await(await fetch(s.base+'/v1/status')).json();
   assert.equal(status.warmPool.state,'OBSERVER_UNAVAILABLE');
   assert.equal(status.warmPool.observedLoadedModelIds,null);
-  assert.equal((await post(s.base,'/v1/chat',{message:'cannot assert warm',modelId:models[0].id})).status,409);
+  assert.deepEqual(status.warmPool.requestedModelIds,[models[0].id,models[1].id]);
+  assert.equal(status.warmPool.observedLoadedModelIds,null);
  }finally{await s.close()}
 });
 test('warm target is bounded by explicit configured capacity',()=>{

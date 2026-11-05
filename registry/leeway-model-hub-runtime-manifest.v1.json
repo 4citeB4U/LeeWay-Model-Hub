@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "leeway.model-hub.runtime-manifest.v1",
+  "manifestId": "LEEWAY_MODEL_HUB_RUNTIME_MANIFEST_20261105",
+  "authority": "LEEWAY_MODEL_HUB",
+  "route": "LEEWAY_DEVICE_BRIDGE::AGENT_TABLET::MODEL_HUB",
+  "consciousness": {
+    "authority": "LEEWAY_MACHINE_CONSCIOUSNESS",
+    "coreMode": "DETERMINISTIC_NON_LLM_MACHINE_CONSCIOUSNESS",
+    "modelRole": "OPTIONAL_BOUNDED_CAPABILITY_LIMB",
+    "providerAfterAdmission": "NOT_REQUIRED",
+    "directProviderRoute": "FORBIDDEN"
+  },
+  "canonicalSource": {
+    "repository": "4citeB4U/LeeWay-Model-Hub",
+    "repositoryUrl": "https://github.com/4citeB4U/LeeWay-Model-Hub",
+    "sourceRef": "main",
+    "manifestPath": "registry/leeway-model-hub-runtime-manifest.v1.json",
+    "sourceAuthority": "GITHUB_REPOSITORY",
+    "immutableCommitRequiredBeforePhysicalExecution": true,
+    "runtimeManifestReadbackRequired": true
+  },
+  "runtimeMaterialization": {
+    "requiredForPhysicalExecution": true,
+    "rootBinding": "LEEWAY_MODEL_HUB_ROOT",
+    "rootPolicy": "EXPLICIT_PORTABLE_MATERIALIZATION_ONLY",
+    "defaultRoot": null,
+    "fixedDriveDefaults": false,
+    "githubIsSourceAuthority": true,
+    "durableStorage": "LEEWAY_CONTINUUM_ONLY",
+    "localWeightsAreEphemeralWorkingSetUntilContinuumAdmission": true
+  },
+  "artifactTransport": {
+    "metadataState": "PUBLISHED_TO_GITHUB",
+    "weightPayloadState": "NOT_YET_HOSTED_IN_GITHUB",
+    "requiredTransport": "GITHUB_RELEASE_OR_GIT_LFS_AFTER_LICENSE_QUOTA_AND_ARTIFACT_ADMISSION",
+    "normalGitRepositoryPayload": "FORBIDDEN_FOR_WEIGHTS",
+    "releasePerFileLimit": "UNDER_2_GIB",
+    "lfsPerFileLimitPlanDependent": true,
+    "licenseReview": "REQUIRED_BEFORE_UPLOAD",
+    "ownerApproval": "REQUIRED_BEFORE_UPLOAD",
+    "integrityManifest": "REQUIRED_BEFORE_UPLOAD",
+    "noInferenceUntilMaterializedAndVerified": true
+  },
+  "residentPool": {
+    "minimumReadyAssetCount": 2,
+    "desiredResidentRuntimeCount": 2,
+    "defaultLifecycle": "PAUSED_RESIDENT",
+    "wake": "FORMULA_AND_DEVICE_BRIDGE_ADMITTED_TASK_ONLY",
+    "returnToPause": true,
+    "shutdown": "SYSTEM_SHUTDOWN_ONLY",
+    "capacityGate": "LEEWAY_EDGE_GPU_AND_VRAM_EVIDENCE_REQUIRED"
+  },
+  "models": [
+    {
+      "id": "qwen3-4b",
+      "displayName": "Qwen3 4B GGUF",
+      "family": "Qwen",
+      "backend": "llama.cpp",
+      "team": "GENERAL_REASONING",
+      "capabilities": [
+        "reasoning",
+        "coding",
+        "general-language"
+      ],
+      "totalBytes": 2497280256,
+      "relativeDirectory": "Qwen3-4B-GGUF",
+      "requiredFiles": [
+        "Qwen3-4B-Q4_K_M.gguf"
+      ],
+      "integrity": [
+        {
+          "path": "Qwen3-4B-Q4_K_M.gguf",
+          "bytes": 2497280256,
+          "sha256": "7485fe6f11af29433bc51cab58009521f205840f5b4ae3a32fa7f92e8534fdf5"
+        }
+      ],
+      "weightLicense": "UNVERIFIED_LOCAL_IMPORT_LICENSE",
+      "artifactState": "LOCAL_RECEIPT_ONLY_NOT_HOSTED"
+    },
+    {
+      "id": "qwen3-vl-8b-instruct",
+      "displayName": "Qwen3-VL-8B-Instruct",
+      "family": "Qwen",
+      "backend": "transformers",
+      "team": "VISION_MULTIMODAL",
+      "capabilities": [
+        "vision",
+        "multimodal",
+        "image-understanding",
+        "video-understanding"
+      ],
+      "upstream": {
+        "repository": "Qwen/Qwen3-VL-8B-Instruct",
+        "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+        "license": "apache-2.0"
+      },
+      "totalBytes": 17545917641,
+      "relativeDirectory": "HuggingFace/Qwen3-VL-8B-Instruct",
+      "requiredFiles": [
+        "config.json",
+        "model.safetensors.index.json",
+        "model-00001-of-00004.safetensors",
+        "model-00002-of-00004.safetensors",
+        "model-00003-of-00004.safetensors",
+        "model-00004-of-00004.safetensors"
+      ],
+      "integrity": [
+        {
+          "path": "model-00001-of-00004.safetensors",
+          "bytes": 4902275944,
+          "sha256": "d5d0aef0eb170fc7453a296c43c0849a56f510555d3588e4fd662bb35490aefa"
+        },
+        {
+          "path": "model-00002-of-00004.safetensors",
+          "bytes": 4915962496,
+          "sha256": "8be88fb5501e4d5719a6d4cc212e6a13480330e74f3e8c77da1a68f199106b5"
+        },
+        {
+          "path": "model-00003-of-00004.safetensors",
+          "bytes": 4999831048,
+          "sha256": "83de00eafe6e0d57ccd009dbcf71c9974d74df2f016c27afb7e95aafd16b2192"
+        },
+        {
+          "path": "model-00004-of-00004.safetensors",
+          "bytes": 2716270024,
+          "sha256": "0a88b98e9f96270973f567e6a2c103ede6ccdf915ca3075e21c755604d0377a5"
+        }
+      ],
+      "weightLicense": "apache-2.0",
+      "artifactState": "LOCAL_RECEIPT_ONLY_NOT_HOSTED"
+    },
+    {
+      "id": "wan2.1-t2v-1.3b",
+      "displayName": "Wan2.1 Text-to-Video 1.3B",
+      "family": "Wan",
+      "backend": "transformers",
+      "team": "VIDEO_CREATION",
+      "capabilities": [
+        "text-to-video",
+        "video-generation"
+      ],
+      "upstream": {
+        "repository": "Wan-AI/Wan2.1-T2V-1.3B",
+        "revision": "37ec512624d61f7aa208f7ea8140a131f93afc9a",
+        "license": "apache-2.0"
+      },
+      "totalBytes": 17573839729,
+      "relativeDirectory": "HuggingFace/Wan2.1-T2V-1.3B",
+      "requiredFiles": [
+        "config.json",
+        "diffusion_pytorch_model.safetensors",
+        "Wan2.1_VAE.pth",
+        "models_t5_umt5-xxl-enc-bf16.pth"
+      ],
+      "integrity": [
+        {
+          "path": "diffusion_pytorch_model.safetensors",
+          "bytes": 5676070424,
+          "sha256": "96b6b242ca1c2f24e9d02cd6596066fab6d310e2d7538f33ae267cb18d957e8f"
+        },
+        {
+          "path": "models_t5_umt5-xxl-enc-bf16.pth",
+          "bytes": 11361920418,
+          "sha256": "7cace0da2b446bbbbc57d031ab6cf163a3d59b366da94e5afe36745b746fd81d"
+        },
+        {
+          "path": "Wan2.1_VAE.pth",
+          "bytes": 507609880,
+          "sha256": "38071ab59bd94681c686fa51d75a1968f64e470262043be31f7a094e442fd981"
+        }
+      ],
+      "executionNote": "Contains pickle-based .pth payloads; separate security/runtime qualification required.",
+      "weightLicense": "apache-2.0",
+      "artifactState": "LOCAL_RECEIPT_ONLY_NOT_HOSTED"
+    }
+  ],
+  "verification": {
+    "sourceManifestPublishedBy": "LEEWAY_GITHUB_MODEL_HUB",
+    "localWeightHashing": "COMPLETED_SHA256_FOR_RECORDED_WEIGHT_FILES",
+    "inference": "NOT_INVOKED",
+    "gpuExecution": "NOT_QUALIFIED",
+    "continuumAdmission": "NOT_EXECUTED_FOR_GITHUB_TRANSFER"
+  }
+}

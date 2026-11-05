@@ -9,5 +9,9 @@
   "api_url_note": "Owner must supply a reachable authenticated LeeWay inference service. No public GPU host is implied.",
   "legacy_catalog": "https://github.com/4citeB4U/LeeWay-Pocket-Agent/blob/main/model-hub/catalog/portable-gemma.v1.json",
   "provenance": "LeeWay Pocket Agent / LeeWay GPU / SlowLane",
-  "requires_independent_gpu_attestation": true
+  "requires_independent_gpu_attestation": true,
+  "runtime_manifest": "https://github.com/4citeB4U/LeeWay-Model-Hub/blob/main/registry/leeway-model-hub-runtime-manifest.v1.json",
+  "runtime_manifest_raw": "https://raw.githubusercontent.com/4citeB4U/LeeWay-Model-Hub/main/registry/leeway-model-hub-runtime-manifest.v1.json",
+  "runtime_source_authority": "GITHUB_REPOSITORY",
+  "weight_payload_state": "NOT_YET_HOSTED_IN_GITHUB"
 }

@@ -35,7 +35,7 @@ export function createModelHubClient({baseUrl,ownerToken='',fetchImpl=fetch}={})
   models:()=>call('/v1/models'),
   status:()=>call('/v1/status'),
   activate:(modelId,backend='OLLAMA')=>call('/v1/models/activate',{modelId,backend}),
-  generate:message=>call('/v1/chat',{message}),
+  generate:(message,modelId)=>call('/v1/chat',{message,...(modelId?{modelId}:{})}),
   health:()=>call('/health')
  });
 }

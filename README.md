@@ -72,7 +72,7 @@ $env:MODEL_HUB_KEEP_ALIVE = '-1'
 node src/server.mjs
 ```
 
-`MODEL_HUB_AUTOSTART_MODELS` is a comma-separated list of one or two **existing allowlisted model IDs**. It supersedes the original single-value `MODEL_HUB_AUTOSTART_MODEL`, which remains supported. Both must refer to already-installed local models; startup does not pull or download weights. The first model is the default selected model; the second can remain warm and be addressed using the optional `modelId` in authenticated `POST /v1/chat` or `createModelHubClient().generate(message,modelId)` without altering the default selection. Inference remains serialized by the current Hub process; this is not a claim of parallel team throughput.
+`MODEL_HUB_AUTOSTART_MODELS` is a comma-separated list of one or two **existing allowlisted model IDs**. It supersedes the original single-value `MODEL_HUB_AUTOSTART_MODEL`, which remains supported. Both must refer to already-installed local models; startup does not pull or download weights. The first model is the default selected model; the second can remain warm so the owner can rapidly change the selected model using the existing authenticated activation API. Requests still use the selected model and reject alternate model IDs supplied in chat JSON. Inference remains serialized by the current Hub process; separate team slots in draft PR #3 are selection-only and do not authorize parallel execution.
 
 `MODEL_HUB_MAX_WARM_MODELS` is bounded to **1 or 2**. When requesting a third different model, the Hub first requests it warm and then releases the oldest requested-warm model, rather than unloading on every model switch. `MODEL_HUB_KEEP_ALIVE=-1` requests indefinite provider residency; availability still depends on host uptime and available memory. Ollama may evict or queue requests under pressure. `GET /v1/status` reports **requested** and **provider-reported actually loaded** model IDs separately, and `GET /v1/models` still reports per-model installed/loaded state. Neither response constitutes independent GPU/Veritas proof.
 
@@ -85,7 +85,7 @@ node src/server.mjs
 - `GET /v1/models` - installed and warm status (upstream Ollama inventory).
 - `GET /v1/status` - selected model, provider, GPU provider qualification state, and upstream-observed warm pool versus requested pool.
 - `POST /v1/models/activate` - authenticated `{"modelId":"gemma-3-1b-q4km","backend":"OLLAMA"}`.
-- `POST /v1/chat` - authenticated `{"message":"..."}` (or `{"message":"...","modelId":"..."}` for a registered, already-observed-warm Ollama model), returns real provider inference.
+- `POST /v1/chat` - authenticated `{"message":"..."}`, returns real provider inference from the selected model; arbitrary alternate model request fields are rejected.
 - `GET /widget` - embeddable UI.
 
 `MODEL_HUB_TOKEN` is required. The inference provider accepts **only models in catalog/models.json**. Third-party Hugging Face/Gemma licenses govern weight files separately.

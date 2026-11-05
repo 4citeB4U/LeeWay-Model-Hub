@@ -99,7 +99,7 @@ test('invalid model and missing owner authorization never change active or warm 
  try{
   assert.equal((await post(s.base,'/v1/models/activate',{modelId:models[0].id},'wrong')).status,401);
   assert.equal((await post(s.base,'/v1/models/activate',{modelId:'unknown-model'})).status,400);
-  assert.equal((await post(s.base,'/v1/chat',{message:'test',modelId:'unknown-model'})).status,409);
+  assert.equal((await post(s.base,'/v1/chat',{message:'test',modelId:'unknown-model'})).status,400);
   assert.equal(u.calls.length,0);
   assert.equal(hub.getState().activeId,null);
   assert.deepEqual(hub.getState().requestedWarmIds,[]);

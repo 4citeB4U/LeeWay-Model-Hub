@@ -11,7 +11,7 @@ The earlier public widget mistakenly used `location.origin` on GitHub Pages as t
 
 The canonical catalog contains **five registered model identities**. As observed on the owner PC, **four were installed** (Gemma 3 1B GGUF, Gemma 4 e4b, Qwen 3.5 4B and Qwen 2.5 0.5B); Gemma 3 270M was catalog-only. This is not intended to enumerate the Hugging Face ecosystem. PocketPal can search public GGUF repositories via its existing Hugging Face integration, and the public LeeWay widget now has equivalent **discovery-only** search; discovery is not automatic authorization, download or inference.
 
-`MODEL_HUB_AUTOSTART_MODEL=gemma-3-1b-q4km` instructs the owner-side runtime to wake one selected, already-installed model on startup. The owner deployment also set `MODEL_HUB_KEEP_ALIVE=-1` (sent to Ollama as a **number**) so the selected model requests indefinite residency, subject to host memory constraints. Selecting a different allowlisted, installed model unloads the previous one and activates the new model. Tests verified real Gemma → Qwen 2.5 0.5B → Gemma switching with the reported active model matching the provider's response.
+`MODEL_HUB_AUTOSTART_MODEL=gemma-3-1b-q4km` instructs the owner-side runtime to wake one selected, already-installed model on startup. The owner deployment also set `MODEL_HUB_KEEP_ALIVE=-1` (sent to Ollama as a **number**) so the selected model requests indefinite residency, subject to host memory constraints. The source change in this review branch allows a bounded two-model warm pool: switching retains the previous model if it fits within the requested pool, and only releases the oldest pool member when the cap is exceeded. Actual residency must be read from Ollama `/api/ps`; a warm request does not prove ongoing memory residency. Tests verified real Gemma → Qwen 2.5 0.5B → Gemma switching with the reported active model matching the provider's response.
 
 The owner-local launcher `.local/start-modelhub.ps1` is **not committed**; it loads a private bearer token from `.local/auth-token.txt`. A per-user Windows Startup entry was installed for auto-launch after logon. A Task Scheduler setup was rejected by the OS (access denied) and not used. The startup launcher avoids creating a duplicate if the service already listens on the assigned port. Persistence after reboot has **not** been independently demonstrated.
 
@@ -35,7 +35,7 @@ Vercel = optional HTTPS API/router (only with an approved reachable backend)
       | 
       +-- LeeWay Model Hub /v1/catalog /v1/models /v1/models/activate /v1/chat
                   |
-             Provider selection (one active model)
+             Provider selection (one active default model; up to two requested-warm local models)
                   +-- Ollama/llama.cpp on an authorized persistent host (implemented)
                   +-- LeeWay GPU inference provider (qualified consumer implemented; trusted binding required)
                   |
@@ -54,18 +54,38 @@ $env:MODEL_HUB_TOKEN = 'your-private-random-token'
 node src/server.mjs
 ```
 
-Open `http://127.0.0.1:8879/`. Choose a model, **Wake / Switch**, then chat. After activation Ollama keeps the selected model warm for 20 minutes between calls, subject to host memory pressure and provider policy. Switching unloads the prior Ollama model; it does not promise zero loading delay.
+Open `http://127.0.0.1:8879/`. Choose a model, **Wake / Switch**, then chat. After activation Ollama keeps the selected model warm for 20 minutes between calls, subject to host memory pressure and provider policy. Switching among two requested-warm models does not forcibly unload the previous one. If the provider cannot fit both models, loading and inference can still queue or evict weights; the Hub reports provider-observed state.
 
 The service binds only to loopback by default. When serving other devices, use authenticated HTTPS reverse proxy or a private overlay/VPN; do **not** expose the plain HTTP service or Ollama port to the public internet. ADB reverse is suitable only for controlled USB development tests. The in-memory owner token is required for model activation and inference. Requests without it fail closed.
+
+## Bounded warm pool for the founding LeeWay Workforce (review-stage source change)
+
+The Hub remains the sole model registry and request entrypoint for authorized LeeWay clients. Workers do **not** download weights or search for GPU providers individually. Use the existing client SDK to send model-scoped requests through the Hub.
+
+On an owner-authorized **persistent inference host** with enough measured RAM/VRAM, the new startup options can request a warm pair of models already installed in the provider:
+
+```powershell
+$env:MODEL_HUB_AUTOSTART_MODELS = 'gemma-3-1b-q4km,qwen-2-5-0-5b-local'
+$env:MODEL_HUB_MAX_WARM_MODELS = '2'
+$env:MODEL_HUB_KEEP_ALIVE = '-1'
+# Supply MODEL_HUB_TOKEN from your existing private startup configuration.
+node src/server.mjs
+```
+
+`MODEL_HUB_AUTOSTART_MODELS` is a comma-separated list of one or two **existing allowlisted model IDs**. It supersedes the original single-value `MODEL_HUB_AUTOSTART_MODEL`, which remains supported. Both must refer to already-installed local models; startup does not pull or download weights. The first model is the default selected model; the second can remain warm and be addressed using the optional `modelId` in authenticated `POST /v1/chat` or `createModelHubClient().generate(message,modelId)` without altering the default selection. Inference remains serialized by the current Hub process; this is not a claim of parallel team throughput.
+
+`MODEL_HUB_MAX_WARM_MODELS` is bounded to **1 or 2**. When requesting a third different model, the Hub first requests it warm and then releases the oldest requested-warm model, rather than unloading on every model switch. `MODEL_HUB_KEEP_ALIVE=-1` requests indefinite provider residency; availability still depends on host uptime and available memory. Ollama may evict or queue requests under pressure. `GET /v1/status` reports **requested** and **provider-reported actually loaded** model IDs separately, and `GET /v1/models` still reports per-model installed/loaded state. Neither response constitutes independent GPU/Veritas proof.
+
+**Not implemented by this repair:** an owner-authorized import of an arbitrary local GGUF or Safetensors folder, immutable model version replacement/rollback, persistent host failover, or verified multi-worker concurrent inference. Those require separate qualification of the existing Hub's local owner and provider boundary. Do not submit arbitrary local file paths or weight blobs through the public Pages widget. Weights stay on the authorized inference host, not in the public GitHub repository.
 
 ## API contracts
 
 - `GET /health` - actual HTTP service process status, not a production certificate.
 - `GET /v1/catalog` - canonical allowlisted model identities and model terms.
 - `GET /v1/models` - installed and warm status (upstream Ollama inventory).
-- `GET /v1/status` - selected model, provider, GPU provider qualification state.
+- `GET /v1/status` - selected model, provider, GPU provider qualification state, and upstream-observed warm pool versus requested pool.
 - `POST /v1/models/activate` - authenticated `{"modelId":"gemma-3-1b-q4km","backend":"OLLAMA"}`.
-- `POST /v1/chat` - authenticated `{"message":"..."}`, returns real provider inference.
+- `POST /v1/chat` - authenticated `{"message":"..."}` (or `{"message":"...","modelId":"..."}` for a registered, already-observed-warm Ollama model), returns real provider inference.
 - `GET /widget` - embeddable UI.
 
 `MODEL_HUB_TOKEN` is required. The inference provider accepts **only models in catalog/models.json**. Third-party Hugging Face/Gemma licenses govern weight files separately.

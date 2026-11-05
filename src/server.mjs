@@ -35,8 +35,9 @@ const matches=(provided,secret)=>{
 export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
       gpuUrl='', gpuToken='', gpuPreviewUrl='', gpuPreviewOnly=false, gpuRequired=false,
       authenticateGpuRequest,verifyGpuQualification,verifyGpuResult,
-      localUiSession=false, keepAlive='20m', fetchImpl=fetch, allowedOrigins=[], readUi=()=>load('public/index.html')}={}) {
+      localUiSession=false, keepAlive='20m', maxWarmModels=2, fetchImpl=fetch, allowedOrigins=[], readUi=()=>load('public/index.html')}={}) {
   if(!catalog?.models?.length) throw Error('CATALOG_REQUIRED');
+  if(!Number.isInteger(maxWarmModels)||maxWarmModels<1||maxWarmModels>2)throw Error('WARM_POOL_LIMIT_INVALID');
   const choices=new Map(catalog.models.map(m=>[m.id,m]));
   if(choices.size!==catalog.models.length)throw Error('DUPLICATE_MODEL_ID');
   const allowed=new Set(allowedOrigins.filter(Boolean));
@@ -52,6 +53,8 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
   const qualifiedGpu=createQualifiedGpuClient({endpoint:gpuUrl,token:gpuToken,fetchImpl,
     authenticateGpuRequest,verifyGpuQualification,verifyGpuResult});
   let activeId=null, busy=false, provider=gpuRequired?'LEEWAY_GPU':gpuPreviewOnly?'LEEWAY_GPU_PREVIEW':'OLLAMA',lastError=null,lastWarmTime=null,gpuSession=null;
+  // A bounded list of requested residency is not physical proof. /api/ps is the observer.
+  let requestedWarmIds=[];
   const callResult=async(base,path,{method='GET',body,secret,timeout=40000}={})=>{
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);
     try{
@@ -117,6 +120,20 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
         portableHandOff:'pocketpal://hub/run?repo_id='+encodeURIComponent(m.hfRepo)+'&filename='+encodeURIComponent(m.gguf)+'&source=leeway-model-hub'}));
     }
   };
+  const warmPoolStatus=async()=>{
+    const requestedModelIds=[...requestedWarmIds];
+    if(provider!=='OLLAMA')return {state:'OTHER_BACKEND',targetMaxModels:maxWarmModels,
+      requestedModelIds,observedLoadedModelIds:null,keepAlive};
+    try{
+      const observed=await ollama('/api/ps',{timeout:8000});
+      if(!Array.isArray(observed.models))throw Error('WARM_POOL_OBSERVER_INVALID');
+      const loadedNames=new Set(observed.models.map(x=>x?.name).filter(x=>typeof x==='string'));
+      const observedLoadedModelIds=[...choices.values()].filter(x=>loadedNames.has(x.ollama)).map(x=>x.id);
+      return {state:'UPSTREAM_REPORTED_NOT_INDEPENDENTLY_VERIFIED',targetMaxModels:maxWarmModels,
+        requestedModelIds,observedLoadedModelIds,keepAlive};
+    }catch(e){return {state:'OBSERVER_UNAVAILABLE',targetMaxModels:maxWarmModels,
+      requestedModelIds,observedLoadedModelIds:null,keepAlive,error:safeError(e)};}
+  };
   const select=async(id,backend=provider)=>{
     if(busy)throw Object.assign(Error('MODEL_SWITCH_BUSY'),{code:409});
     const model=choices.get(id);if(!model)throw Object.assign(Error('MODEL_NOT_ALLOWLISTED'),{code:400});
@@ -138,11 +155,16 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
         const t=await ollama('/api/tags',{timeout:12000});
         if(!(t.models||[]).some(x=>x.name===model.ollama))
           throw Object.assign(Error('MODEL_NOT_INSTALLED_ON_PROVIDER'),{code:409});
-        if(activeId&&provider==='OLLAMA'&&activeId!==id){
-          const old=choices.get(activeId);
-          await ollama('/api/generate',{method:'POST',body:{model:old.ollama,prompt:'',stream:false,keep_alive:0},timeout:30000});
-        }
+        // Keep a bounded selection of previously requested models warm. Do not unload
+        // the previous model on every switch. Model weights remain in provider storage.
         await ollama('/api/generate',{method:'POST',body:{model:model.ollama,prompt:'',stream:false,keep_alive:keepAlive},timeout:120000});
+        requestedWarmIds=requestedWarmIds.filter(x=>x!==id);
+        requestedWarmIds.push(id);
+        while(requestedWarmIds.length>maxWarmModels){
+          const victim=choices.get(requestedWarmIds[0]);
+          await ollama('/api/generate',{method:'POST',body:{model:victim.ollama,prompt:'',stream:false,keep_alive:0},timeout:30000});
+          requestedWarmIds.shift();
+        }
       }
       provider=backend;activeId=id;gpuSession=selectedGpuSession;
       lastWarmTime=backend==='OLLAMA'?new Date().toISOString():null;lastError=null;
@@ -159,7 +181,16 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
     if(!bounded(message,6000))throw Object.assign(Error('INVALID_MESSAGE'),{code:400});
     busy=true;
     try{
-    const model=choices.get(activeId);
+    const {modelId:requestedModelId,...providerOptions}=options&&typeof options==='object'&&!Array.isArray(options)?options:{};
+    const targetModelId=requestedModelId??activeId;
+    if(!choices.has(targetModelId))throw Object.assign(Error('MODEL_NOT_ALLOWLISTED'),{code:400});
+    if(targetModelId!==activeId){
+      if(provider!=='OLLAMA')throw Object.assign(Error('MODEL_SESSION_MISMATCH'),{code:409});
+      const warm=await warmPoolStatus();
+      if(!Array.isArray(warm.observedLoadedModelIds)||!warm.observedLoadedModelIds.includes(targetModelId))
+        throw Object.assign(Error('MODEL_NOT_OBSERVED_WARM'),{code:409});
+    }
+    const model=choices.get(targetModelId);
     const start=performance.now();
     if(provider==='LEEWAY_GPU_PREVIEW'){
       const result=await callResult(gpuPreviewUrl,'/v1/chat/completions',{method:'POST',body:{
@@ -187,11 +218,11 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
     if(provider==='LEEWAY_GPU'){
       if(!gpuSession)throw Object.assign(Error('GPU_ACTIVATION_REQUIRED'),{code:503});
       if(!options||typeof options!=='object'||Array.isArray(options)||
-        Object.keys(options).some(key=>!['requestId','sessionId','maxNewTokens'].includes(key)))
+        Object.keys(providerOptions).some(key=>!['requestId','sessionId','maxNewTokens'].includes(key)))
         throw Object.assign(Error('GPU_REQUEST_OPTIONS_INVALID'),{code:400});
       if(options.sessionId!==undefined&&options.sessionId!==gpuSession.sessionId)
         throw Object.assign(Error('GPU_SESSION_MISMATCH'),{code:400});
-      const answer=await qualifiedGpu.generate({modelId:activeId,prompt:message,...options,sessionId:gpuSession.sessionId},
+      const answer=await qualifiedGpu.generate({modelId:activeId,prompt:message,...providerOptions,sessionId:gpuSession.sessionId},
         {expectedClientId:gpuSession.clientId,signal});
       return {...answer,elapsedMs:Math.round(performance.now()-start),gpuClaim:'TRUSTED_CONSUMER_VERIFIED_REQUEST'};
     }
@@ -202,7 +233,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
     if(!bounded(text,12000))throw Error('MODEL_GENERATED_NO_USABLE_TEXT');
     const inv=await ollama('/api/ps',{timeout:8000}).catch(()=>({models:[]}));
     const vram=(inv.models||[]).find(m=>m.name===model.ollama)?.size_vram??null;
-    return {modelId:activeId,backend:'OLLAMA',text,elapsedMs:Math.round(performance.now()-start),
+    return {modelId:targetModelId,backend:'OLLAMA',text,elapsedMs:Math.round(performance.now()-start),
       tokenCount:reply.eval_count??null,vramBytesReported:vram,
       gpuClaim:vram>0?'UPSTREAM_VRAM_REPORTED_NOT_INDEPENDENTLY_VERIFIED':'NOT_PROVEN'};
     }finally{busy=false;}
@@ -229,7 +260,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
       return json(res,200,{models:await inventory()},origin,allowed);
     if(req.method==='GET'&&url.pathname==='/v1/status')
       return json(res,200,{activeModel:activeId,backend:provider,busy,gpuPreviewOnly,gpuRequired,
-        lastWarmTime,lastError,leeWayGpu:await gpuCapabilities(),leeWayGpuPreview:await gpuPreviewStatus(),
+        lastWarmTime,lastError,warmPool:await warmPoolStatus(),leeWayGpu:await gpuCapabilities(),leeWayGpuPreview:await gpuPreviewStatus(),
         warning:'A GitHub-hosted shader is not evidence of remote model inference. Verify physical provider independently.'},origin,allowed);
     if(req.method==='POST'&&['/v1/models/activate','/v1/chat'].includes(url.pathname)){
       if(!token)return json(res,503,{error:'OWNER_TOKEN_NOT_CONFIGURED'},origin,allowed);
@@ -241,7 +272,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
         body=JSON.parse(input||'{}');
       }catch{return json(res,400,{error:'INVALID_JSON_OR_TOO_LARGE'},origin,allowed);}
       try{
-        const allowedFields=new Set(url.pathname==='/v1/models/activate'?['modelId','backend']:['message','requestId','sessionId','maxNewTokens']);
+        const allowedFields=new Set(url.pathname==='/v1/models/activate'?['modelId','backend']:['message','modelId','requestId','sessionId','maxNewTokens']);
         if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).some(key=>!allowedFields.has(key)))
           return json(res,400,{error:'REQUEST_FIELD_UNSUPPORTED'},origin,allowed);
         const abortController=new AbortController();
@@ -250,14 +281,14 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
         res.once('close',()=>{if(!res.writableEnded)abort();});
         const value=url.pathname==='/v1/models/activate'?
           await select(body.modelId,body.backend??provider):
-          await infer(body.message,Object.fromEntries(['requestId','sessionId','maxNewTokens'].filter(key=>body[key]!==undefined).map(key=>[key,body[key]])),
+          await infer(body.message,Object.fromEntries(['modelId','requestId','sessionId','maxNewTokens'].filter(key=>body[key]!==undefined).map(key=>[key,body[key]])),
             {signal:abortController.signal});
         return json(res,200,value,origin,allowed);
       }catch(e){return json(res,e.code||502,{error:safeError(e)},origin,allowed);}
     }
     return json(res,404,{error:'NOT_FOUND'},origin,allowed);
   };
-  return {handler,select,infer,inventory,getState:()=>({activeId,provider,busy,lastWarmTime}),gpuCapabilities};
+  return {handler,select,infer,inventory,getState:()=>({activeId,provider,busy,lastWarmTime,requestedWarmIds:[...requestedWarmIds]}),warmPoolStatus,gpuCapabilities};
 }
 
 export async function start({authenticateGpuRequest,verifyGpuQualification,verifyGpuResult}={}){
@@ -272,7 +303,16 @@ export async function start({authenticateGpuRequest,verifyGpuQualification,verif
   const token=process.env.MODEL_HUB_TOKEN||(localUiSession?randomBytes(32).toString('base64url'):'');
   const allowedOrigins=(process.env.MODEL_HUB_ALLOWED_ORIGINS||'').split(',').map(x=>x.trim()).filter(Boolean);
   if(localUiSession){allowedOrigins.push('http://127.0.0.1:'+port,'http://localhost:'+port);}
-  const hub=createHub({catalog,token,localUiSession,gpuPreviewOnly,gpuRequired,
+  const maxWarmModels=Number(process.env.MODEL_HUB_MAX_WARM_MODELS||2);
+  const bootModels=(process.env.MODEL_HUB_AUTOSTART_MODELS||process.env.MODEL_HUB_AUTOSTART_MODEL||'')
+    .split(',').map(x=>x.trim()).filter(Boolean);
+  if(!Number.isInteger(maxWarmModels)||maxWarmModels<1||maxWarmModels>2)throw Error('WARM_POOL_LIMIT_INVALID');
+  if(bootModels.length>maxWarmModels||new Set(bootModels).size!==bootModels.length)
+    throw Error('AUTOWARM_POOL_CONFIGURATION_INVALID');
+  const bootBackend=process.env.MODEL_HUB_AUTOSTART_BACKEND||(gpuRequired?'LEEWAY_GPU':gpuPreviewOnly?'LEEWAY_GPU_PREVIEW':'OLLAMA');
+  if(bootModels.length>1&&bootBackend!=='OLLAMA')throw Error('MULTI_MODEL_WARM_POOL_REQUIRES_OLLAMA_BACKEND');
+  if(bootModels.some(id=>!catalog.models.some(x=>x.id===id)))throw Error('AUTOWARM_MODEL_NOT_REGISTERED');
+  const hub=createHub({catalog,token,localUiSession,gpuPreviewOnly,gpuRequired,maxWarmModels,
     authenticateGpuRequest,verifyGpuQualification,verifyGpuResult,
     ollamaUrl:process.env.MODEL_HUB_OLLAMA_URL||'http://127.0.0.1:11434',
     gpuUrl:process.env.LEEWAY_GPU_INFERENCE_URL||'',gpuToken:process.env.LEEWAY_GPU_INFERENCE_TOKEN||'',
@@ -293,12 +333,18 @@ export async function start({authenticateGpuRequest,verifyGpuQualification,verif
     }));
     // Owner-configured autowarm: host runtime can be ready before any phone, PC or web client connects.
     // Physical GPU use is not inferred from activation. A real LeeWay GPU inference provider stays fail-closed.
-    const bootModel=process.env.MODEL_HUB_AUTOSTART_MODEL||'';
-    const bootBackend=process.env.MODEL_HUB_AUTOSTART_BACKEND||(gpuRequired?'LEEWAY_GPU':gpuPreviewOnly?'LEEWAY_GPU_PREVIEW':'OLLAMA');
-    if(bootModel){
-      hub.select(bootModel,bootBackend).then(v=>
-        console.log(JSON.stringify({event:'MODEL_AUTO_WARMED',model:v.selected,backend:v.backend,gpuProof:v.gpuProof}))
-      ).catch(e=>
+    // Warm a bounded list in reverse order so the first configured model
+    // remains selected. Only the original host/provider can actually retain weights.
+    if(bootModels.length){
+      (async()=>{
+        for(const id of [...bootModels].reverse()){
+          const v=await hub.select(id,bootBackend);
+          console.log(JSON.stringify({event:'MODEL_AUTO_WARM_REQUESTED',model:v.selected,backend:v.backend,
+            gpuProof:v.gpuProof,modelWarmState:v.modelWarmState}));
+        }
+        const observation=await hub.warmPoolStatus();
+        console.log(JSON.stringify({event:'MODEL_WARM_POOL_OBSERVED',...observation}));
+      })().catch(e=>
         console.error(JSON.stringify({event:'MODEL_AUTO_WARM_FAILED',error:safeError(e)}))
       );
     }

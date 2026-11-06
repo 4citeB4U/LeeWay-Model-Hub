@@ -107,8 +107,8 @@ test('canonical GitHub model metadata remains closed until actual license and fi
  assert.ok(gguf.errors.includes('WEIGHT_LICENSE_UNVERIFIED'));
  for(const id of ['qwen3-vl-8b-instruct','wan2.1-t2v-1.3b']){
    const result=inspectModel(source,id);
-   assert.equal(result.status,'BLOCKED');
-   assert.ok(result.errors.some(x=>x.startsWith('REQUIRED_FILE_HASH_MISSING:')));
+   assert.equal(result.status,'SOURCE_METADATA_VALID_NOT_ADMITTED');
+   assert.deepEqual(result.errors,[]);
  }
 });
 

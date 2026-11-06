@@ -111,3 +111,11 @@ test('canonical GitHub model metadata remains closed until actual license and fi
    assert.ok(result.errors.some(x=>x.startsWith('REQUIRED_FILE_HASH_MISSING:')));
  }
 });
+
+test('symlink output root cannot write back into source tree',async()=>{
+ const f=await fixture();try{
+   const linked=path.join(f.dir,'linked-out');
+   await symlink(f.source,linked);
+   await assert.rejects(stageRelease({...f,sourceRoot:f.source,outputRoot:linked,apply:true}),/OUTPUT_ROOT_SYMLINK_DENIED/);
+ }finally{await clean(f);}
+});

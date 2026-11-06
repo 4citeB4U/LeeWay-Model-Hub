@@ -58,6 +58,25 @@ Open `http://127.0.0.1:8879/`. Choose a model, **Wake / Switch**, then chat. Aft
 
 The service binds only to loopback by default. When serving other devices, use authenticated HTTPS reverse proxy or a private overlay/VPN; do **not** expose the plain HTTP service or Ollama port to the public internet. ADB reverse is suitable only for controlled USB development tests. The in-memory owner token is required for model activation and inference. Requests without it fail closed.
 
+## Owner-local file import into this Model Hub (source review candidate)
+
+The existing Hub did not have a qualified local-model import action. The bounded CLI `scripts/import-local-gguf.mjs` is now available as a **review-stage source change**. It accepts only a single GGUF file the owner already has in a chosen local directory. It does **not** download models, receive weights through the public Pages widget, grant worker permissions or bypass the source model registry. It uses the original local Ollama provider's `ollama create` operation, verifies actual provider inventory, then adds model metadata to the existing Hub catalog and its public catalog mirror. No weight file or local private path is committed to GitHub.
+
+Owner-local Windows example (use the **real** existing file path and its independently calculated hash):
+
+```powershell
+$ImportRoot = Read-Host 'Absolute path of the approved local import directory'
+$ModelFile = Read-Host 'Absolute path to an existing GGUF file in that directory'
+$ActualSha = (Get-FileHash -LiteralPath $ModelFile -Algorithm SHA256).Hash.ToLowerInvariant()
+npm run import:local:gguf -- --import-root $ImportRoot --file $ModelFile --id 'research-v1' --display-name 'Research model v1' --license 'Creator-reviewed model license' --expected-sha256 $ActualSha
+# Review the PREFLIGHT_ONLY result before any mutation.
+# Repeat the exact command with --apply only after Creator approval.
+```
+
+`--apply` is an explicit owner-local action. It refuses paths outside the chosen root (including escaping symlinks), a missing or mismatched expected SHA-256, non-GGUF magic, incomplete license metadata, duplicate Hub IDs, pre-existing Ollama model names, incompatible catalog mirrors and missing provider installation readback. Model IDs must be **versioned** when replacing with newer weights; this import never deletes or silently overwrites the previous Ollama model.
+
+The current running Hub reads the catalog at startup. An owner-controlled **Hub registry service reload** is required to pick up a newly imported local model; the Ollama model/weight store need not be stopped. Actual inference, memory residency, GPU use and model suitability must still be tested. If provider installation succeeds but a later catalog write fails, do not blindly uninstall the installed model: reconcile it against the preflight log and original files. The source tests use synthetic GGUF fixtures and never execute a real Ollama import.
+
 ## API contracts
 
 - `GET /health` - actual HTTP service process status, not a production certificate.

@@ -8,8 +8,8 @@
 
 - The canonical runtime manifest declares three model packages and says `weightPayloadState: NOT_YET_HOSTED_IN_GITHUB`. The Model Hub repository had **zero GitHub Releases** when inspected.
 - `qwen3-4b`: full 2,497,280,256-byte GGUF digest recorded, but `weightLicense: UNVERIFIED_LOCAL_IMPORT_LICENSE`. This cannot be published on the strength of an unreviewed license string. The file exceeds GitHub Release's 2 GiB single-asset limit.
-- `qwen3-vl-8b-instruct`: four large safetensors shards have recorded digests; `config.json` and `model.safetensors.index.json` are required but do not have SHA-256 entries. The manifest's totalBytes differs from the sum of hashed required files.
-- `wan2.1-t2v-1.3b`: large weight files have recorded digests; required `config.json` has no SHA-256 entry and the totalBytes value differs from the sum of hashed required files. The `.pth` payloads require separate pickle/security qualification before any execution.
+- `qwen3-vl-8b-instruct`: Device Bridge readback now supplies SHA-256 entries for all required files, including `config.json` and `model.safetensors.index.json`; the manifest total is reconciled to the observed required-file bytes. The package remains local-only and unmaterialized.
+- `wan2.1-t2v-1.3b`: Device Bridge readback now supplies SHA-256 entries for every required file, including `config.json`; the manifest total is reconciled to the observed required-file bytes. The `.pth` payloads still require separate pickle/security qualification before any execution, and the package remains local-only and unmaterialized.
 - Draft PR #5 adds **owner-local GGUF import** via the existing Ollama provider. This transport repair complements it; it does not install or admit a model, update the public catalog, or bypass PR #5.
 
 ## Deterministic source-side transport (this PR)

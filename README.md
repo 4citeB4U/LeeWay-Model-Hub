@@ -27,6 +27,11 @@ The owner-local launcher `.local/start-modelhub.ps1` is **not committed**; it lo
 
 Pocket Agent Lee used to contain a small Gemma model catalog at `model-hub/catalog/portable-gemma.v1.json`. This repository extracts that selection contract into **one shared Model Hub**, preserving Pocket Agent and SlowLane as clients rather than creating competing authorities. The existing native floating widget remains an independent UI host; this repo provides an embeddable responsive service UI. Do not delete historical source until adapters have passed tests.
 
+## GitHub model-weight asset materialization (review-stage transport)
+
+The runtime manifest in `registry/leeway-model-hub-runtime-manifest.v1.json` currently identifies three local-receipt-only model packages. Their actual weight bytes are **not** present in this repository's GitHub Releases. Do not interpret catalog entries, GitHub Pages, or source tests as downloaded, admitted, resident, or executable models.
+
+Draft source repair: [`docs/GITHUB-MODEL-ASSET-MATERIALIZATION.md`](docs/GITHUB-MODEL-ASSET-MATERIALIZATION.md) documents the new owner-local `audit`, `stage`, and `materialize` commands. It preserves exact weight hashes, splits large files into bounded Release candidates, verifies reconstruction, and leaves real Continuum/Formula/Veritas/Receipt/Learning admission to their existing authorities. Model Hub inference remains closed until real materialized bytes and independent admission pass.
 ## Architecture
 
 ```text

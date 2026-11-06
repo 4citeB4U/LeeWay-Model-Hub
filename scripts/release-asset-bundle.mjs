@@ -27,6 +27,19 @@ const validRel=(value)=>typeof value==='string'&&value.length>0&&value.length<30
   !value.includes('\\')&&value.split('/').every(s=>SEG.test(s)&&s!=='.'&&s!=='..');
 const inside=(parent,child)=>child===parent||child.startsWith(parent+path.sep);
 
+async function canonicalOutputRoot(requested){
+  const absolute=path.resolve(requested);
+  try{
+    const st=await lstat(absolute);
+    if(st.isSymbolicLink())fail('OUTPUT_ROOT_SYMLINK_DENIED');
+    return await realpath(absolute);
+  }catch(error){
+    if(error.code!=='ENOENT')throw error;
+    const parent=await canonicalOutputRoot(path.dirname(absolute));
+    return path.join(parent,path.basename(absolute));
+  }
+}
+
 export function inspectModel(manifest,modelId){
   const errors=[];
   if(manifest?.schemaVersion!=='leeway.model-hub.runtime-manifest.v1')errors.push('SOURCE_MANIFEST_SCHEMA_INVALID');
@@ -83,7 +96,7 @@ export async function stageRelease({manifest,manifestBytes,modelId,sourceRoot,ou
   if(inspection.errors.length)fail(inspection.errors.join(';'));
   if(!Number.isSafeInteger(partBytes)||partBytes<1||partBytes>MAX_PART)fail('PART_BYTES_OUT_OF_RANGE');
   if(!path.isAbsolute(sourceRoot)||!path.isAbsolute(outputRoot))fail('ABSOLUTE_ROOTS_REQUIRED');
-  const src=await realpath(sourceRoot),out=path.resolve(outputRoot);
+  const src=await realpath(sourceRoot),out=await canonicalOutputRoot(outputRoot);
   if(inside(src,out)||inside(out,src))fail('SOURCE_OUTPUT_ROOT_OVERLAP');
   const model=inspection.model,files=[];
   for(const entry of model.integrity){
@@ -137,7 +150,7 @@ export async function materializeRelease({manifest,manifestBytes,modelId,bundleR
   const inspection=inspectModel(manifest,modelId);
   if(inspection.errors.length)fail(inspection.errors.join(';'));
   if(!path.isAbsolute(bundleRoot)||!path.isAbsolute(outputRoot))fail('ABSOLUTE_ROOTS_REQUIRED');
-  const bundle=await realpath(bundleRoot),out=path.resolve(outputRoot);
+  const bundle=await realpath(bundleRoot),out=await canonicalOutputRoot(outputRoot);
   if(inside(bundle,out)||inside(out,bundle))fail('BUNDLE_OUTPUT_ROOT_OVERLAP');
   const releaseFile=await safeFile(bundle,'release-assets.v1.json');
   const release=JSON.parse(await readFile(releaseFile,'utf8'));

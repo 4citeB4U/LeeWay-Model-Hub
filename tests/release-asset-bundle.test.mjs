@@ -99,3 +99,15 @@ test('dry run hashes source without publishing, materializing or admitting',asyn
    await assert.rejects(access(f.staged));
  }finally{await clean(f);}
 });
+
+test('canonical GitHub model metadata remains closed until actual license and file hashes qualify',async()=>{
+ const source=JSON.parse(await readFile(new URL('../registry/leeway-model-hub-runtime-manifest.v1.json',import.meta.url),'utf8'));
+ const gguf=inspectModel(source,'qwen3-4b');
+ assert.equal(gguf.status,'BLOCKED');
+ assert.ok(gguf.errors.includes('WEIGHT_LICENSE_UNVERIFIED'));
+ for(const id of ['qwen3-vl-8b-instruct','wan2.1-t2v-1.3b']){
+   const result=inspectModel(source,id);
+   assert.equal(result.status,'BLOCKED');
+   assert.ok(result.errors.some(x=>x.startsWith('REQUIRED_FILE_HASH_MISSING:')));
+ }
+});

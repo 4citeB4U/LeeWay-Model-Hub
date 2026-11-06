@@ -94,7 +94,7 @@
         "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
         "license": "apache-2.0"
       },
-      "totalBytes": 17545917641,
+      "totalBytes": 17534408745,
       "relativeDirectory": "HuggingFace/Qwen3-VL-8B-Instruct",
       "requiredFiles": [
         "config.json",
@@ -105,6 +105,16 @@
         "model-00004-of-00004.safetensors"
       ],
       "integrity": [
+        {
+          "path": "config.json",
+          "bytes": 1474,
+          "sha256": "5cd452860dc1e9c29dd71cc3cef7f39b338b7a40793f7a260655c2d3568f3661"
+        },
+        {
+          "path": "model.safetensors.index.json",
+          "bytes": 67759,
+          "sha256": "520b2e05079402e9468a8701d03d1154d14b2599593afb6effa7fb60c1bff070"
+        },
         {
           "path": "model-00001-of-00004.safetensors",
           "bytes": 4902275944,
@@ -144,7 +154,7 @@
         "revision": "37ec512624d61f7aa208f7ea8140a131f93afc9a",
         "license": "apache-2.0"
       },
-      "totalBytes": 17573839729,
+      "totalBytes": 17545600971,
       "relativeDirectory": "HuggingFace/Wan2.1-T2V-1.3B",
       "requiredFiles": [
         "config.json",
@@ -154,19 +164,24 @@
       ],
       "integrity": [
         {
+          "path": "config.json",
+          "bytes": 249,
+          "sha256": "ab37994c43740513f94b3ba6233a784035a67b43c8cde83c8f31aa90468c67ce"
+        },
+        {
           "path": "diffusion_pytorch_model.safetensors",
           "bytes": 5676070424,
           "sha256": "96b6b242ca1c2f24e9d02cd6596066fab6d310e2d7538f33ae267cb18d957e8f"
         },
         {
-          "path": "models_t5_umt5-xxl-enc-bf16.pth",
-          "bytes": 11361920418,
-          "sha256": "7cace0da2b446bbbbc57d031ab6cf163a3d59b366da94e5afe36745b746fd81d"
-        },
-        {
           "path": "Wan2.1_VAE.pth",
           "bytes": 507609880,
           "sha256": "38071ab59bd94681c686fa51d75a1968f64e470262043be31f7a094e442fd981"
+        },
+        {
+          "path": "models_t5_umt5-xxl-enc-bf16.pth",
+          "bytes": 11361920418,
+          "sha256": "7cace0da2b446bbbbc57d031ab6cf163a3d59b366da94e5afe36745b746fd81d"
         }
       ],
       "executionNote": "Contains pickle-based .pth payloads; separate security/runtime qualification required.",

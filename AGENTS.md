@@ -1,5 +1,6 @@
 <!--
 LEEWAY HEADER — DO NOT REMOVE
+DISCOVERY_PIPELINE: Voice → Intent → Location → Vertical → Ranking → Render
 REGION: LEEWAY.ECOSYSTEM.REPOSITORY.ADMISSION
 TAG: LEEWAY.REPOSITORY.WORKER.ADMISSION.V1
 5WH:
@@ -9,7 +10,7 @@ WHO = Creator/Human Authority and this repository's existing authorized source o
 WHERE = AGENTS.md in this repository.
 WHEN = 2026-11-12 Creator-directed core-spine source admission rollout.
 HOW = Bootstrap existing Standards, Engineering, Receipt Authority, Skills, role contracts and owning mission; enforce by original Runtime/CI authorities, not by this text alone.
-LICENSE = Existing repository terms; no new licensing asserted.
+LICENSE: Existing repository terms; no new licensing asserted.
 -->
 # LeeWay Repository — Mandatory Governed Worker Admission
 
@@ -30,3 +31,7 @@ LICENSE = Existing repository terms; no new licensing asserted.
 
 
 All mutations require original source owner permission and properly reviewed changes. In ambiguous or denied scopes, record exact reason and `NOT_EXECUTED`; continue separate authorized work. Never add fake receipts, scores, signed decisions or secrets.
+
+## Final boundary — effective canonical law and work custody
+
+[Approved LeeWay Standards main](https://github.com/4citeB4U/LeeWay-Standards/commit/2e5e98bdc49cfe0bf180de394db054eaf2f8e3d3) supersedes historical pending PR #71 references. Final handoff requires mission/work/source, scope/grants, evidence FOR/AGAINST, measurements, decisions, corrections, learner practice and next owner/gate. No source or test result self-confers production authority.

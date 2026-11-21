@@ -7,8 +7,9 @@
   "engines": {"node": ">=20"},
   "scripts": {
     "start": "node src/server.mjs",
+    "import:local:gguf": "node scripts/import-local-gguf.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check src/server.mjs && node --check src/qualified-gpu-client.mjs"
+    "check": "node --check src/server.mjs && node --check src/qualified-gpu-client.mjs && node --check scripts/import-local-gguf.mjs"
   },
   "license": "UNLICENSED"
 }

@@ -4,11 +4,16 @@
   "private": true,
   "type": "module",
   "description": "LeeWay sovereign model registry, inference router and portable model widget",
-  "engines": {"node": ">=20"},
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node src/server.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check src/server.mjs && node --check src/qualified-gpu-client.mjs"
+    "check": "node --check src/server.mjs && node --check src/qualified-gpu-client.mjs && node --check scripts/release-asset-bundle.mjs",
+    "assets:audit": "node scripts/release-asset-bundle.mjs audit",
+    "assets:stage": "node scripts/release-asset-bundle.mjs stage",
+    "assets:materialize": "node scripts/release-asset-bundle.mjs materialize"
   },
   "license": "UNLICENSED"
 }

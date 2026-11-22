@@ -85,9 +85,22 @@ export function planCreatorFactoryTask({
       entry.models.some(id => !inspected.models.some(model => model.id === id))) {
     throw Error('CREATOR_FACTORY_TASK_REFERENCES_UNKNOWN_MODEL');
   }
+  const activeSupportIds = contract.lightweightProfile?.candidateCore?.map(model => model.modelId) ?? [];
+  if (!Array.isArray(entry.activeAdvisoryModels) || entry.activeAdvisoryModels.length !== 3 ||
+      JSON.stringify(entry.activeAdvisoryModels) !== JSON.stringify(activeSupportIds) ||
+      entry.modelsAreRequiredForNativeWork !== false ||
+      entry.modelReportsCannotVerifyExecution !== true ||
+      entry.modelReportsCannotCreateWorkers !== true ||
+      entry.nativeExecutionOwner !== 'LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_NATIVE_APP_WORKER') {
+    throw Error('CREATOR_FACTORY_CONSCIOUSNESS_OWNER_PLAN_INVALID');
+  }
   return Object.freeze({
     status: 'CANDIDATE_PLAN_REQUIRES_ORIGINAL_RUNTIME_ADMISSION',
-    application, task, candidateModels: Object.freeze([...entry.models]), // advisory contributors only
+    application, task, candidateModels: Object.freeze([...entry.models]), // preserved historical advisory options
+    activeAdvisoryModels: Object.freeze([...activeSupportIds]),
+    modelReportsMayIndependentlyVerify: false,
+    modelsMayCreateWorkers: false,
+    modelsOptionalForNativeWork: true,
     candidateModelParticipation: entry.modelParticipation,
     nativeExecutionOwner: entry.executionAuthority,
     modelMayRenderOrPublish: false,

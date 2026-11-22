@@ -16,6 +16,7 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {createQualifiedGpuClient} from './qualified-gpu-client.mjs';
+import {loadThreeModelCore,threeModelCatalog,createThreeModelGpuRuntime} from './creator-three-model-core.mjs';
 
 const root = new URL('../', import.meta.url);
 const load = path => readFile(new URL(path, root), 'utf8');
@@ -35,7 +36,8 @@ const matches=(provided,secret)=>{
 export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
       gpuUrl='', gpuToken='', gpuPreviewUrl='', gpuPreviewOnly=false, gpuRequired=false,
       authenticateGpuRequest,verifyGpuQualification,verifyGpuResult,
-      localUiSession=false, keepAlive='20m', fetchImpl=fetch, allowedOrigins=[], readUi=()=>load('public/index.html')}={}) {
+      localUiSession=false, keepAlive='20m', fetchImpl=fetch, allowedOrigins=[], readUi=()=>load('public/index.html'),
+      coreProfile=null}={}) {
   if(!catalog?.models?.length) throw Error('CATALOG_REQUIRED');
   const choices=new Map(catalog.models.map(m=>[m.id,m]));
   if(choices.size!==catalog.models.length)throw Error('DUPLICATE_MODEL_ID');
@@ -51,6 +53,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
   if(gpuRequired&&gpuPreviewOnly)throw Error('GPU_REQUIRED_AND_PREVIEW_ONLY_CONFLICT');
   const qualifiedGpu=createQualifiedGpuClient({endpoint:gpuUrl,token:gpuToken,fetchImpl,
     authenticateGpuRequest,verifyGpuQualification,verifyGpuResult});
+  const threeCore=coreProfile?createThreeModelGpuRuntime({profile:coreProfile,gpuClient:qualifiedGpu}):null;
   let activeId=null, busy=false, provider=gpuRequired?'LEEWAY_GPU':gpuPreviewOnly?'LEEWAY_GPU_PREVIEW':'OLLAMA',lastError=null,lastWarmTime=null,gpuSession=null;
   const callResult=async(base,path,{method='GET',body,secret,timeout=40000}={})=>{
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);
@@ -225,13 +228,19 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
       return json(res,200,{service:'LEEWAY_MODEL_HUB',status:'RUNNING',modelSelected:activeId,backend:provider,busy,version:'0.1.0'},origin,allowed);
     if(req.method==='GET'&&url.pathname==='/v1/catalog')
       return json(res,200,catalog,origin,allowed);
+    if(req.method==='GET'&&url.pathname==='/v1/core/status')
+      return json(res,200,threeCore?await threeCore.status():{status:'THREE_CORE_NOT_CONFIGURED'},origin,allowed);
     if(req.method==='GET'&&url.pathname==='/v1/models')
       return json(res,200,{models:await inventory()},origin,allowed);
     if(req.method==='GET'&&url.pathname==='/v1/status')
       return json(res,200,{activeModel:activeId,backend:provider,busy,gpuPreviewOnly,gpuRequired,
         lastWarmTime,lastError,leeWayGpu:await gpuCapabilities(),leeWayGpuPreview:await gpuPreviewStatus(),
         warning:'A GitHub-hosted shader is not evidence of remote model inference. Verify physical provider independently.'},origin,allowed);
-    if(req.method==='POST'&&['/v1/models/activate','/v1/chat'].includes(url.pathname)){
+    if(req.method==='POST'&&['/v1/models/activate','/v1/chat','/v1/core/infer'].includes(url.pathname)){
+      if(threeCore&&url.pathname!=='/v1/core/infer')
+        return json(res,409,{error:'THREE_CORE_REQUIRES_ROLE_SCOPED_INFERENCE'},origin,allowed);
+      if(!threeCore&&url.pathname==='/v1/core/infer')
+        return json(res,404,{error:'THREE_CORE_NOT_CONFIGURED'},origin,allowed);
       if(!token)return json(res,503,{error:'OWNER_TOKEN_NOT_CONFIGURED'},origin,allowed);
       const claimed=(req.headers.authorization||'').replace(/^Bearer\s+/i,'');
       if(!matches(claimed,token))return json(res,401,{error:'UNAUTHORIZED'},origin,allowed);
@@ -241,14 +250,18 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
         body=JSON.parse(input||'{}');
       }catch{return json(res,400,{error:'INVALID_JSON_OR_TOO_LARGE'},origin,allowed);}
       try{
-        const allowedFields=new Set(url.pathname==='/v1/models/activate'?['modelId','backend']:['message','requestId','sessionId','maxNewTokens']);
+        const allowedFields=new Set(url.pathname==='/v1/core/infer'?
+          ['role','prompt','requestId','maxNewTokens','image']:
+          url.pathname==='/v1/models/activate'?['modelId','backend']:['message','requestId','sessionId','maxNewTokens']);
         if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).some(key=>!allowedFields.has(key)))
           return json(res,400,{error:'REQUEST_FIELD_UNSUPPORTED'},origin,allowed);
         const abortController=new AbortController();
         const abort=()=>abortController.abort();
         req.once('aborted',abort);
         res.once('close',()=>{if(!res.writableEnded)abort();});
-        const value=url.pathname==='/v1/models/activate'?
+        const value=url.pathname==='/v1/core/infer'?
+          await threeCore.infer(body,{signal:abortController.signal}):
+          url.pathname==='/v1/models/activate'?
           await select(body.modelId,body.backend??provider):
           await infer(body.message,Object.fromEntries(['requestId','sessionId','maxNewTokens'].filter(key=>body[key]!==undefined).map(key=>[key,body[key]])),
             {signal:abortController.signal});
@@ -257,22 +270,26 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
     }
     return json(res,404,{error:'NOT_FOUND'},origin,allowed);
   };
-  return {handler,select,infer,inventory,getState:()=>({activeId,provider,busy,lastWarmTime}),gpuCapabilities};
+  return {handler,select,infer,inventory,threeCore,getState:()=>({activeId,provider,busy,lastWarmTime}),gpuCapabilities};
 }
 
 export async function start({authenticateGpuRequest,verifyGpuQualification,verifyGpuResult}={}){
-  const catalog=JSON.parse(await load('catalog/models.json'));
+  // Creator's three-model rehaul is the default active product profile.
+  // Prior catalog/weights remain untouched; only three roles enter this runtime.
+  const coreEnabled=process.env.MODEL_HUB_THREE_CORE!=='false';
+  const coreProfile=coreEnabled?await loadThreeModelCore():null;
+  const catalog=coreProfile?threeModelCatalog(coreProfile):JSON.parse(await load('catalog/models.json'));
   const port=Number(process.env.MODEL_HUB_PORT||8879);
   const host=process.env.MODEL_HUB_BIND||'127.0.0.1';
   const localUiSession=process.env.MODEL_HUB_LOCAL_UI_SESSION==='true';
   const gpuPreviewOnly=process.env.MODEL_HUB_GPU_PREVIEW_ONLY==='true';
-  const gpuRequired=process.env.MODEL_HUB_GPU_REQUIRED==='true';
+  const gpuRequired=coreEnabled||process.env.MODEL_HUB_GPU_REQUIRED==='true';
   if(localUiSession&&host!=='127.0.0.1')throw Error('LOCAL_UI_SESSION_REQUIRES_LOOPBACK_BIND');
   if(gpuPreviewOnly&&!process.env.LEEWAY_GPU_PREVIEW_URL)throw Error('GPU_PREVIEW_ONLY_REQUIRES_LEEWAY_GPU_ENDPOINT');
   const token=process.env.MODEL_HUB_TOKEN||(localUiSession?randomBytes(32).toString('base64url'):'');
   const allowedOrigins=(process.env.MODEL_HUB_ALLOWED_ORIGINS||'').split(',').map(x=>x.trim()).filter(Boolean);
   if(localUiSession){allowedOrigins.push('http://127.0.0.1:'+port,'http://localhost:'+port);}
-  const hub=createHub({catalog,token,localUiSession,gpuPreviewOnly,gpuRequired,
+  const hub=createHub({catalog,token,localUiSession,gpuPreviewOnly,gpuRequired,coreProfile,
     authenticateGpuRequest,verifyGpuQualification,verifyGpuResult,
     ollamaUrl:process.env.MODEL_HUB_OLLAMA_URL||'http://127.0.0.1:11434',
     gpuUrl:process.env.LEEWAY_GPU_INFERENCE_URL||'',gpuToken:process.env.LEEWAY_GPU_INFERENCE_TOKEN||'',
@@ -289,6 +306,7 @@ export async function start({authenticateGpuRequest,verifyGpuQualification,verif
       leeWayGpuProviderConfigured:!!process.env.LEEWAY_GPU_INFERENCE_URL,
       leeWayGpuPreviewConfigured:!!process.env.LEEWAY_GPU_PREVIEW_URL,
       gpuPreviewOnly,
+      activeCore:coreEnabled?'CREATOR_THREE_MODEL_CORE':'LEGACY_OPT_IN',
       status:'SERVING_NOT_PRODUCTION_ADMITTED'
     }));
     // Owner-configured autowarm: host runtime can be ready before any phone, PC or web client connects.

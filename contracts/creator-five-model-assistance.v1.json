@@ -226,34 +226,30 @@
     "noHostStatus": "DEFER_AND_PRESERVE_CHECKPOINT_NOT_RUNNING"
   },
   "lightweightProfile": {
-    "profileId": "LEEWAY_QWEN3_COMPACT_CPU_FIRST",
-    "status": "CANDIDATE_SELECTION_NOT_INSTALLED_OR_RUNNING",
-    "operatingMode": "MINIMAL_ACTIVE_MODEL_STORAGE_AND_ON_DEMAND_SPECIALISTS",
+    "profileId": "LEEWAY_QWEN3_TRINITY_COMPACT_ASSISTIVE",
+    "status": "CREATOR_SELECTED_CANDIDATE_NOT_INSTALLED_OR_RUNNING",
+    "operatingMode": "ONE_OWNER_GOVERNED_ACTIVE_SKILL_WEAVE_THREE_ROLE_SPECIFIC_MODELS",
     "sourceOfTruth": "EXISTING_MODEL_HUB_CATALOG_AND_ORIGINAL_RUNTIME_MANIFEST",
     "ownerAuthority": "LEEWAY_MACHINE_CONSCIOUSNESS_AGENT_LEE_UNDER_CREATOR_AND_RUNTIME",
     "residentLimit": "MEASURE_HARDWARE_AND_MEMORY_BEFORE_SELECTING_WARM_POOL",
-    "targetPublishedPackageMegabytes": 2215,
-    "targetPublishedPackageUnits": "DECIMAL_MB_NOT_RAM",
+    "targetPublishedPackageMegabytes": 3123,
+    "targetPublishedPackageUnits": "DECIMAL_MB_NOT_RAM_AND_NOT_TRAINING_WORKSPACE",
     "targetIsMeasuredFootprint": false,
     "candidateCore": [
-      {
-        "modelId": "gemma-3-270m-q4km",
-        "sourceType": "ALREADY_IN_CANONICAL_CATALOG",
-        "providerTag": "hf.co/second-state/gemma-3-270m-it-GGUF:Q4_K_M",
-        "publishedPackageMegabytes": 292,
-        "upstreamLicense": "Google Gemma Terms",
-        "status": "CATALOG_ONLY_LIVE_INSTALL_UNVERIFIED",
-        "role": "bounded_classification"
-      },
       {
         "modelId": "qwen3-0.6b-q4km",
         "sourceType": "EXISTING_QWEN3_FAMILY_IN_EDGE_GPU_HISTORY_INTAKE_PENDING",
         "providerTag": "qwen3:0.6b",
         "upstreamModel": "Qwen/Qwen3-0.6B",
         "publishedPackageMegabytes": 523,
+        "publishedPackageMegabytesMaximum": 523,
         "upstreamLicense": "apache-2.0",
         "status": "NOT_IN_CANONICAL_MODEL_HUB_CATALOG_INTAKE_REQUIRED",
-        "role": "fast_reasoning_and_skill_plan"
+        "role": "fast_router_reflex_and_skill_plan",
+        "modalities": [
+          "text"
+        ],
+        "toolAuthority": "NONE"
       },
       {
         "modelId": "qwen3-1.7b-q4km",
@@ -261,9 +257,30 @@
         "providerTag": "qwen3:1.7b",
         "upstreamModel": "Qwen/Qwen3-1.7B",
         "publishedPackageMegabytes": 1400,
+        "publishedPackageMegabytesMaximum": 1400,
         "upstreamLicense": "apache-2.0",
         "status": "NOT_IN_CANONICAL_MODEL_HUB_CATALOG_INTAKE_REQUIRED",
-        "role": "office_ide_and_multistep_reasoning"
+        "role": "agent_lee_conversation_and_office",
+        "modalities": [
+          "text"
+        ],
+        "toolAuthority": "NONE"
+      },
+      {
+        "modelId": "qwen3.5-0.8b",
+        "sourceType": "VERIFIED_PUBLIC_MULTIMODAL_SOURCE_NOT_YET_ADMITTED",
+        "providerTag": "qwen3.5:0.8b",
+        "upstreamModel": "Qwen/Qwen3.5-0.8B",
+        "publishedPackageMegabytes": 1200,
+        "publishedPackageMegabytesMaximum": 1300,
+        "upstreamLicense": "apache-2.0",
+        "status": "NOT_IN_CANONICAL_MODEL_HUB_CATALOG_INTAKE_REQUIRED_MULTIMODAL_ADAPTER_UNQUALIFIED",
+        "role": "tablet_multimodal_eyes",
+        "modalities": [
+          "text",
+          "image"
+        ],
+        "toolAuthority": "NONE"
       }
     ],
     "historicallyInstalledButNotLiveRechecked": [
@@ -274,6 +291,10 @@
       {
         "modelId": "qwen-2-5-0-5b-local",
         "role": "ultralight_existing_fallback"
+      },
+      {
+        "modelId": "gemma-3-270m-q4km",
+        "role": "previous_small_router_candidate_registered_not_observed_installed"
       }
     ],
     "retainedOnDemand": [
@@ -303,12 +324,13 @@
     ],
     "optionalResearchOnly": [
       {
-        "modelId": "qwen3.5-0.8b",
-        "providerTag": "qwen3.5:0.8b",
-        "upstreamModel": "Qwen/Qwen3.5-0.8B",
-        "publishedPackageMegabytesEstimate": 1200,
-        "status": "UNINSTALLED_UNADMITTED_IMAGE_INPUT_ADAPTER_NOT_VERIFIED",
-        "role": "conditional_lightweight_visual_assistance"
+        "modelId": "qwen3.5-2b",
+        "providerTag": "qwen3.5:2b",
+        "upstreamModel": "Qwen/Qwen3.5-2B",
+        "publishedPackageMegabytesEstimateMinimum": 2700,
+        "publishedPackageMegabytesEstimateMaximum": 3100,
+        "status": "ALTERNATIVE_SLOT2_UNADMITTED_AND_LARGER_PACKAGE",
+        "role": "conditional_agent_lee_language_upgrade"
       }
     ],
     "skillsBinding": {
@@ -348,6 +370,115 @@
       "browserCpu": "OPTIONAL_QUALIFIED_CLIENT_SIDE_WASM_NOT_ESTABLISHED",
       "productionCompute": "EXISTING_AUTHORIZED_LEEWAY_GPU_CPU_RAM_OR_APPROVED_HOST",
       "claimGitHubAsPersistentCpu": false
+    },
+    "priorCompactCandidate": {
+      "sourceStatus": "PRIOR_DRAFT_PROPOSAL_RETAINED_NOT_ACTIVE",
+      "oldPublishedPackageMegabytes": 2215,
+      "models": [
+        {
+          "modelId": "gemma-3-270m-q4km",
+          "sourceType": "ALREADY_IN_CANONICAL_CATALOG",
+          "providerTag": "hf.co/second-state/gemma-3-270m-it-GGUF:Q4_K_M",
+          "publishedPackageMegabytes": 292,
+          "upstreamLicense": "Google Gemma Terms",
+          "status": "CATALOG_ONLY_LIVE_INSTALL_UNVERIFIED",
+          "role": "bounded_classification"
+        },
+        {
+          "modelId": "qwen3-0.6b-q4km",
+          "sourceType": "EXISTING_QWEN3_FAMILY_IN_EDGE_GPU_HISTORY_INTAKE_PENDING",
+          "providerTag": "qwen3:0.6b",
+          "upstreamModel": "Qwen/Qwen3-0.6B",
+          "publishedPackageMegabytes": 523,
+          "upstreamLicense": "apache-2.0",
+          "status": "NOT_IN_CANONICAL_MODEL_HUB_CATALOG_INTAKE_REQUIRED",
+          "role": "fast_reasoning_and_skill_plan"
+        },
+        {
+          "modelId": "qwen3-1.7b-q4km",
+          "sourceType": "VERIFIED_PUBLIC_SOURCE_NOT_YET_ADMITTED",
+          "providerTag": "qwen3:1.7b",
+          "upstreamModel": "Qwen/Qwen3-1.7B",
+          "publishedPackageMegabytes": 1400,
+          "upstreamLicense": "apache-2.0",
+          "status": "NOT_IN_CANONICAL_MODEL_HUB_CATALOG_INTAKE_REQUIRED",
+          "role": "office_ide_and_multistep_reasoning"
+        }
+      ],
+      "reason": "Creator provided three distinct Qwen-family roles with multimodal slot; retain earlier candidate for rollback"
+    },
+    "targetPublishedPackageMegabytesMaximum": 3223,
+    "visionInputGate": {
+      "sourceService": "EXISTING_LEEWAY_MODEL_HUB_SRC_SERVER",
+      "currentV1ChatSchema": "TEXT_ONLY_MESSAGE_REQUEST_ID_SESSION_ID_MAX_NEW_TOKENS",
+      "currentOllamaProviderRoute": "/api/generate",
+      "upstreamVisionRouteCandidate": "/api/chat",
+      "upstreamVisionField": "messages[].images",
+      "currentVisionAdapter": "NOT_IMPLEMENTED_OR_QUALIFIED_IN_LEEWAY_MODEL_HUB",
+      "requires": [
+        "OWNER_APPROVED_SCREENSHOT_OR_IMAGE",
+        "STRICT_MIME_AND_IMAGE_SIZE_BOUND",
+        "FILE_CONTENT_PRIVACY_REDACTION",
+        "AUTHORIZED_DEVICE_BRIDGE_ORIGINAL_ROUTE",
+        "MODEL_IMAGE_PROCESSOR_AND_PROJECTOR_READBACK",
+        "SAME_REQUEST_MODEL_OUTPUT_CORRELATION",
+        "FORMULA_POLICY_GATE",
+        "INDEPENDENT_VERITAS_POSTSTATE"
+      ],
+      "visionOrScreenExecuteAllowed": false,
+      "status": "BLOCKED_UNTIL_ORIGINAL_MODEL_HUB_HOST_AND_SKILLS_PATH_ARE_QUALIFIED"
+    },
+    "sizePreservingAdaptation": {
+      "authority": "CANDIDATE_ONLY_SOURCE_PLAN_NOT_WEIGHT_TRAINING",
+      "policy": "PRESERVE_DEPLOYED_BYTE_CAP_AFTER_REAL_PER_MODEL_MEASUREMENT",
+      "defaultMethod": "NO_WEIGHT_UPDATE_USE_GOVERNED_PROMPT_AND_SKILL_EXAMPLES",
+      "adaptationCandidateMethods": [
+        "SUPERVISED_FINE_TUNING_LORA",
+        "OPTIONAL_QLORA_COMPATIBILITY_RESEARCH",
+        "TEACHER_STUDENT_DISTILLATION_WITH_LICENSE_CHECK",
+        "ADAPTER_MERGE_THEN_FORMAT_CONVERSION_AND_REQUANTIZATION"
+      ],
+      "mergeFormula": "W_NEW = W_BASE + (ALPHA / RANK) * (B @ A) where LoRA parameterization supports it",
+      "mergeWorkflow": [
+        "READBACK_ORIGINAL_SOURCE_HASH_AND_ARCHITECTURE",
+        "CHECK_TRAINING_RIGHTS_LICENSE_AND_DATA_PROVENANCE",
+        "MEASURE_FROZEN_BASELINE_OUTPUT_STORAGE_BYTES_RAM_PEAK_LATENCY_AND_QUALITY",
+        "TRAIN_ADAPTER_IN_SEPARATE_BOUNDED_WORKSPACE_WITH_APPROVED_SAMPLES",
+        "MERGE_ONLY_TO_STAGED_COPY_OF_SUPPORTED_HIGH_PRECISION_WEIGHTS",
+        "CONVERT_STAGED_COPY_TO_VERIFIED_RUNTIME_FORMAT",
+        "REQUANTIZE_TO_EXACT_CHOSEN_FORMAT_WITH_SUPPORTED_ARCHITECTURE",
+        "MEASURE_CANDIDATE_BYTE_SIZE_FULL_PIPELINE_RAM_AND_OUTPUT_REGRESSION",
+        "REJECT_OVERSIZE_OR_BEHAVIOR_REGRESSION",
+        "CANONICAL_FORMULA_VERITAS_PRE_AND_POST_WITH_INDEPENDENT_RECEIPT",
+        "OWNER_APPROVED_ATOMIC_RUNTIME_SELECTION_AND_ROLLBACK"
+      ],
+      "sourceWeightMutation": "FORBIDDEN",
+      "trainingJobStarts": "NOT_EXECUTED",
+      "stagedAndOriginalWeightsMayExceedRuntimeBudget": true,
+      "parameterCountIsNotFileSizeGuarantee": true,
+      "repeatMergeIntoQuantizedWeights": "FORBIDDEN_WITHOUT_FULL_BASE_RELOAD_AND_REEVALUATION",
+      "requireCandidateBytesAtMostMeasuredBasePackageBytes": true,
+      "requireEqualOutputQuality": "CANDIDATE_METRICS_MUST_BE_MEASURED_WITH_ACCEPTANCE_THRESHOLDS",
+      "requireVersionedImmutablePredecessor": true,
+      "noProductionAutoPromotion": true,
+      "nonWeightSettings": "SYSTEM_PROMPT_OR_MODELFILE_ONLY_NOT_A_WEIGHT_UPDATE",
+      "calibratedInferenceOptions": {
+        "tokenLimit": "BOUND_PER_TASK",
+        "temperature": "MEASURE_WITH_TRAINING_FREE_BASELINE",
+        "topP": "MEASURE_PER_TASK",
+        "stopSequences": "COMPATIBLE_WITH_QWEN_CHAT_TEMPLATE_ONLY",
+        "validJson": "USE_PROVIDER_SCHEMA_MODE_AND_VALIDATE_STRICTLY",
+        "thinking": "EXPLICIT_COMPATIBLE_SETTING_PER_PROVIDER",
+        "toolCallText": "UNTRUSTED_CANDIDATE_NEVER_SHELL_OR_PRIVILEGE"
+      },
+      "pipelineEvidence": "NOT_EXECUTED"
+    },
+    "roleBoundary": {
+      "router": "PROPOSE_INTENT_AND_SKILL_WITHOUT_GRANTING_TOOL",
+      "agentLeeConversation": "SUGGEST_LANGUAGE_RESPONSES_AND_OFFICE_STRUCTURES_MUST_NOT_BE_AGENT_LEE_AUTHORITY",
+      "tabletEyes": "ANALYZE_APPROVED_IMAGE_PIXELS_AND_UI_CAPTURES_ONLY_AFTER_MULTIMODAL_PROVIDER_ADMISSION",
+      "otherCapabilities": "OFFICE_INFOGRAPHIC_VIDEO_RENDER_CRM_SEND_AND_ROUTE_CAMERAS_REMAIN_OWNED_BY_ORIGINAL_APP_AND_DEVICE_SERVICES",
+      "noExternalModelApi": true
     }
   }
 }

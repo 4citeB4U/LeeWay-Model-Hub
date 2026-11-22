@@ -284,3 +284,32 @@ test('self-authorization and fake qualified image adapter cannot enter triad pla
   assert.throws(()=>planCreatorWeightAdaptation({...sources,contract:image,modelId:'qwen3.5-0.8b'}),/CREATOR_WEIGHT_ADAPTATION_AUTHORITY_INVALID/);
   assert.throws(()=>planCreatorWeightAdaptation({...sources,modelId:'qwen3.5-2b'}),/CREATOR_WEIGHT_ADAPTATION_AUTHORITY_INVALID/);
 });
+
+test('Qwen triad cooperates across every app while Machine Consciousness executes native work', () => {
+  const expected=['qwen3-0.6b-q4km','qwen3-1.7b-q4km','qwen3.5-0.8b'];
+  for (const task of contract.appTasks) {
+    const p=planCreatorFactoryTask({
+      ...sources,application:task.application,task:task.task,sourceIds:['owner-source-1']
+    });
+    assert.deepEqual(p.activeAdvisoryModels,expected);
+    assert.equal(p.modelsOptionalForNativeWork,true);
+    assert.equal(p.modelsMayCreateWorkers,false);
+    assert.equal(p.modelReportsMayIndependentlyVerify,false);
+    assert.equal(p.machineConsciousnessOwnsTask,true);
+    assert.equal(p.nativeExecutionOwner,'LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_NATIVE_APP_WORKER');
+    assert.equal(p.inferenceStarted,false);
+  }
+});
+
+test('forged model-native execution or alternate expert map authority is denied by original profile', () => {
+  const mutated=structuredClone(contract);
+  mutated.appTasks[0].modelsAreRequiredForNativeWork=true;
+  assert.throws(()=>planCreatorFactoryTask({
+    ...sources,contract:mutated,application:'OFFICE',task:'source_to_infographic',sourceIds:['source-1']
+  }),/CREATOR_FACTORY_CONSCIOUSNESS_OWNER_PLAN_INVALID/);
+  const changed=structuredClone(contract);
+  changed.lightweightProfile.consciousnessFirstSupport.modelTeamCanCreateWorkers=true;
+  assert.throws(()=>inspectCreatorLightweightProfile({...sources,contract:changed}),/CREATOR_LIGHTWEIGHT_AUTHORITY_CONTRACT_INVALID/);
+  assert.equal(contract.lightweightProfile.consciousnessFirstSupport.derivedExpertRouting.noSecondSkillRegistry,true);
+  assert.equal(contract.lightweightProfile.consciousnessFirstSupport.derivedExpertRouting.actualDynamicModelToSkillIntegration,'NOT_EXECUTED');
+});

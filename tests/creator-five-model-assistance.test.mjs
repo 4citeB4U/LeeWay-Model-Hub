@@ -20,7 +20,9 @@ import {
   describeCreatorLearningReview,
   loadCreatorFiveModelContract,
   inspectCreatorLightweightProfile,
-  planCreatorSkillAssistance
+  planCreatorSkillAssistance,
+  planCreatorWeightAdaptation,
+  assessCreatorAdaptationPackageBytes
 } from '../src/creator-five-model-assistance.mjs';
 
 const catalog = JSON.parse(readFileSync(new URL('../catalog/models.json', import.meta.url), 'utf8'));
@@ -141,11 +143,12 @@ test('three-hour evaluation is explicitly unscheduled and is not autonomous weig
 
 test('compact Qwen3-first profile is small, three candidates, and never reports actual residency', () => {
   const report = inspectCreatorLightweightProfile(sources);
-  assert.equal(report.profileId, 'LEEWAY_QWEN3_COMPACT_CPU_FIRST');
-  assert.equal(report.nominalPackageMegabytes, 2215);
+  assert.equal(report.profileId, 'LEEWAY_QWEN3_TRINITY_COMPACT_ASSISTIVE');
+  assert.equal(report.nominalPackageMegabytes, 3123);
+  assert.equal(report.maximumNominalPackageMegabytes, 3223);
   assert.equal(report.nominalBytesAreNotRam, true);
   assert.deepEqual(report.models.map(m => m.modelId), [
-    'gemma-3-270m-q4km','qwen3-0.6b-q4km','qwen3-1.7b-q4km'
+    'qwen3-0.6b-q4km','qwen3-1.7b-q4km','qwen3.5-0.8b'
   ]);
   for (const m of report.models) {
     assert.equal(m.installed,'NOT_ESTABLISHED');
@@ -155,16 +158,17 @@ test('compact Qwen3-first profile is small, three candidates, and never reports 
     assert.equal(m.inferenceStarted,false);
   }
   assert.equal(report.mutation,'NOT_EXECUTED');
+  assert.equal(report.visionProviderQualified,false);
+  assert.equal(report.weightTrainingStarted,false);
+  assert.equal(report.sourceOriginalWeightsChanged,false);
 });
 
 test('existing Gemma catalog registration is distinct from new Qwen3 import candidates', () => {
   const p = inspectCreatorLightweightProfile(sources);
-  assert.equal(p.models[0].registeredInModelHub, true);
-  assert.equal(p.models[0].intakeRequired, false);
-  assert.equal(p.models[1].registeredInModelHub, false);
-  assert.equal(p.models[1].intakeRequired, true);
-  assert.equal(p.models[2].registeredInModelHub, false);
-  assert.equal(p.models[2].intakeRequired, true);
+  assert.deepEqual(p.models.map(model => model.registeredInModelHub),[false,false,false]);
+  assert.deepEqual(p.models.map(model => model.intakeRequired),[true,true,true]);
+  assert.ok(catalog.models.some(model => model.id === 'gemma-3-270m-q4km'));
+  assert.ok(contract.lightweightProfile.priorCompactCandidate.models.some(model => model.modelId === 'gemma-3-270m-q4km'));
   assert.equal(p.automaticDownloads, false);
   assert.equal(p.productionCpuProvider,'NOT_VERIFIED');
 });
@@ -201,7 +205,7 @@ test('skill planner denies models outside compact and retained sets', () => {
     ...sources,modelId:'random-unapproved-model',application:'IDE',task:'plan_code_review_and_test'
   }),/CREATOR_LIGHTWEIGHT_MODEL_NOT_IN_APPROVED_PROFILE/);
   assert.throws(() => planCreatorSkillAssistance({
-    ...sources,modelId:'qwen3-0.6b-q4km',application:'OFFICE',task:'undeclared_task'
+    ...sources,modelId:'qwen3.5-0.8b',application:'OFFICE',task:'undeclared_task'
   }),/CREATOR_FACTORY_TASK_NOT_REGISTERED/);
 });
 
@@ -223,4 +227,60 @@ test('GitHub Pages and Actions never count as persistent LeeWay inference CPU', 
   assert.match(contract.lightweightProfile.githubCpu.actions,/EPHEMERAL/);
   assert.equal(contract.lightweightProfile.modelIntake.automaticInference,false);
   assert.equal(contract.lightweightProfile.skillsBinding.runtimeBindingState,'SOURCE_CONTRACT_ONLY_NOT_CONNECTED');
+});
+
+
+test('three Creator triad models have nonoverlapping tasks and exact nominal download range', () => {
+  const p=inspectCreatorLightweightProfile(sources);
+  assert.deepEqual(p.models.map(m => m.role),[
+    'fast_router_reflex_and_skill_plan',
+    'agent_lee_conversation_and_office',
+    'tablet_multimodal_eyes'
+  ]);
+  assert.deepEqual(p.models.map(m=>m.modalities),[['text'],['text'],['text','image']]);
+  assert.equal(p.nominalPackageMegabytes,523+1400+1200);
+  assert.equal(p.maximumNominalPackageMegabytes,523+1400+1300);
+  assert.equal(p.visionProviderQualified,false);
+  assert.equal(p.adaptationPromiseIsSizeProof,false);
+  assert.equal(contract.lightweightProfile.visionInputGate.currentOllamaProviderRoute,'/api/generate');
+  assert.equal(contract.lightweightProfile.visionInputGate.upstreamVisionRouteCandidate,'/api/chat');
+  assert.equal(contract.lightweightProfile.visionInputGate.visionOrScreenExecuteAllowed,false);
+});
+
+test('LoRA update is a staged candidate and never overwrites actual model weights', () => {
+  for (const id of ['qwen3-0.6b-q4km','qwen3-1.7b-q4km','qwen3.5-0.8b']) {
+    const a=planCreatorWeightAdaptation({...sources,modelId:id});
+    assert.equal(a.sourceWeights,'IMMUTABLE');
+    assert.equal(a.modelTraining,'NOT_EXECUTED');
+    assert.equal(a.candidateWeightSha,'NOT_GENERATED');
+    assert.equal(a.exactBasePackageBytes,'NOT_MEASURED');
+    assert.equal(a.exactCandidatePackageBytes,'NOT_MEASURED');
+    assert.equal(a.mutation,'NOT_EXECUTED');
+  }
+  assert.equal(contract.lightweightProfile.sizePreservingAdaptation.parameterCountIsNotFileSizeGuarantee,true);
+  assert.equal(contract.lightweightProfile.sizePreservingAdaptation.stagedAndOriginalWeightsMayExceedRuntimeBudget,true);
+});
+
+test('size-cap check remains unverified and rejects missing, oversized or malformed inputs', () => {
+  const noBytes=assessCreatorAdaptationPackageBytes({});
+  assert.equal(noBytes.status,'BLOCKED');
+  assert.equal(noBytes.promotion,'NOT_AUTHORIZED');
+  const compact=assessCreatorAdaptationPackageBytes({baselineBytes:900000000,candidateBytes:899999999});
+  assert.equal(compact.status,'SIZE_WITHIN_REPORTED_CAP_NOT_ADMITTED');
+  assert.equal(compact.measurementsIndependentlyVerified,false);
+  assert.equal(compact.promotion,'NOT_AUTHORIZED');
+  const tooLarge=assessCreatorAdaptationPackageBytes({baselineBytes:900000000,candidateBytes:900000001});
+  assert.equal(tooLarge.status,'CANDIDATE_EXCEEDS_REPORTED_SIZE_CAP');
+  assert.equal(tooLarge.promotion,'NOT_AUTHORIZED');
+  assert.equal(assessCreatorAdaptationPackageBytes({baselineBytes:10,candidateBytes:1.5}).status,'BLOCKED');
+});
+
+test('self-authorization and fake qualified image adapter cannot enter triad plan', () => {
+  const policy=JSON.parse(JSON.stringify(contract));
+  policy.lightweightProfile.sizePreservingAdaptation.sourceWeightMutation='ALLOWED';
+  assert.throws(()=>planCreatorWeightAdaptation({...sources,contract:policy,modelId:'qwen3-0.6b-q4km'}),/CREATOR_WEIGHT_ADAPTATION_AUTHORITY_INVALID/);
+  const image=JSON.parse(JSON.stringify(contract));
+  image.lightweightProfile.visionInputGate.visionOrScreenExecuteAllowed=true;
+  assert.throws(()=>planCreatorWeightAdaptation({...sources,contract:image,modelId:'qwen3.5-0.8b'}),/CREATOR_WEIGHT_ADAPTATION_AUTHORITY_INVALID/);
+  assert.throws(()=>planCreatorWeightAdaptation({...sources,modelId:'qwen3.5-2b'}),/CREATOR_WEIGHT_ADAPTATION_AUTHORITY_INVALID/);
 });

@@ -155,7 +155,7 @@ function fillBackends(s){
 }
 async function publicCatalog(){
  try{
-  const r=await fetch('./catalog/models.json',{cache:'no-store'});
+  const r=await fetch('./catalog/active-three-core.json',{cache:'no-store'});
   if(!r.ok||!(r.headers.get('content-type')||'').includes('json'))throw Error('Catalog unavailable');
   const j=await r.json();catalog=j.models||[];fillModels();
  }catch{catalog=[];fillModels();$('modelStatus').textContent='Public model catalog is temporarily unavailable.';}

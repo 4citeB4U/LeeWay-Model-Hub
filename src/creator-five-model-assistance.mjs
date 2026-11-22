@@ -114,3 +114,115 @@ export function describeCreatorLearningReview({contract = loadCreatorFiveModelCo
     mutation: 'NOT_EXECUTED'
   });
 }
+
+
+/**
+ * Inspect the Creator's compact deployment selection without declaring that
+ * candidate Qwen variants are catalog-admitted, installed, warmed or capable
+ * of invoking any existing Agent Skills directly.
+ */
+export function inspectCreatorLightweightProfile({
+  catalog, runtimeManifest, contract = loadCreatorFiveModelContract()
+} = {}) {
+  inspectCreatorFiveModelRoster({catalog, runtimeManifest, contract});
+  const profile = contract.lightweightProfile;
+  const skill = profile?.skillsBinding;
+  if (profile?.profileId !== 'LEEWAY_QWEN3_COMPACT_CPU_FIRST' ||
+      profile?.status !== 'CANDIDATE_SELECTION_NOT_INSTALLED_OR_RUNNING' ||
+      !Array.isArray(profile?.candidateCore) || profile.candidateCore.length !== 3 ||
+      skill?.canonicalRepository !== '4citeB4U/LeeWay-Agent-Skills' ||
+      skill?.selectionOwner !== 'skills/leeway-skill-orchestrator/SKILL.md' ||
+      skill?.authorityOwner !== 'skills/leeway-tool-gateway/SKILL.md' ||
+      skill?.runtimeBindingState !== 'SOURCE_CONTRACT_ONLY_NOT_CONNECTED' ||
+      skill?.modelOutputIsOnlySuggestion !== true || skill?.skillGrantFromModel !== false ||
+      profile?.modelIntake?.automaticDownload !== false ||
+      profile?.modelIntake?.automaticWeightDeletion !== false ||
+      profile?.modelIntake?.automaticInference !== false ||
+      profile?.githubCpu?.claimGitHubAsPersistentCpu !== false) {
+    throw Error('CREATOR_LIGHTWEIGHT_AUTHORITY_CONTRACT_INVALID');
+  }
+  const expected = [
+    'gemma-3-270m-q4km', 'qwen3-0.6b-q4km', 'qwen3-1.7b-q4km'
+  ];
+  if (profile.candidateCore.some((item, index) => item.modelId !== expected[index] ||
+      !idValid(item.modelId) || !(item.publishedPackageMegabytes > 0) ||
+      !Number.isFinite(item.publishedPackageMegabytes)) ||
+      profile.candidateCore.reduce((sum, item) => sum + item.publishedPackageMegabytes, 0) !==
+        profile.targetPublishedPackageMegabytes) {
+    throw Error('CREATOR_LIGHTWEIGHT_MODEL_OR_SIZE_MISMATCH');
+  }
+  const selected = profile.candidateCore.map(item => {
+    const registered = catalog.models.some(model => model.id === item.modelId) ||
+      runtimeManifest.models.some(model => model.id === item.modelId);
+    if ((item.sourceType === 'ALREADY_IN_CANONICAL_CATALOG') !== registered) {
+      throw Error('CREATOR_LIGHTWEIGHT_SOURCE_CLASSIFICATION_INVALID:' + item.modelId);
+    }
+    return Object.freeze({
+      modelId: item.modelId, role: item.role,
+      publishedPackageMegabytes: item.publishedPackageMegabytes,
+      registeredInModelHub: registered,
+      intakeRequired: !registered,
+      providerTag: item.providerTag,
+      sourceStatus: item.status,
+      installed: 'NOT_ESTABLISHED',
+      loaded: 'NOT_ESTABLISHED',
+      formulaEvaluated: false,
+      leeWayGpuExecuted: false,
+      skillsConnectedAtRuntime: false,
+      inferenceStarted: false
+    });
+  });
+  return Object.freeze({
+    profileId: profile.profileId,
+    status: profile.status,
+    candidateCount: selected.length,
+    nominalPackageMegabytes: profile.targetPublishedPackageMegabytes,
+    nominalBytesAreNotRam: true,
+    models: Object.freeze(selected),
+    skillsRoute: Object.freeze([...skill.flow]),
+    skillsConnection: skill.runtimeBindingState,
+    retainedOnDemand: Object.freeze(profile.retainedOnDemand.map(model => model.modelId)),
+    retainedCold: Object.freeze(profile.retainedCold.map(model => model.modelId)),
+    automaticDownloads: false,
+    productionCpuProvider: 'NOT_VERIFIED',
+    mutation: 'NOT_EXECUTED'
+  });
+}
+
+/**
+ * Build only a skill graph request. The original Orchestrator/Formula/Tool
+ * Gateway must independently resolve an actual skill and authority grant.
+ */
+export function planCreatorSkillAssistance({
+  modelId, application, task, catalog, runtimeManifest,
+  contract = loadCreatorFiveModelContract()
+} = {}) {
+  const profile = inspectCreatorLightweightProfile({catalog, runtimeManifest, contract});
+  if (!idValid(modelId) ||
+      !profile.models.some(m => m.modelId === modelId) &&
+      !profile.retainedOnDemand.includes(modelId) &&
+      !profile.retainedCold.includes(modelId)) {
+    throw Error('CREATOR_LIGHTWEIGHT_MODEL_NOT_IN_APPROVED_PROFILE');
+  }
+  const taskEntry = contract.appTasks.find(t => t.application === application && t.task === task);
+  if (!taskEntry) throw Error('CREATOR_FACTORY_TASK_NOT_REGISTERED');
+  return Object.freeze({
+    status: 'SKILL_GRAPH_DISCOVERY_REQUEST_NOT_DISPATCHED',
+    requestedModelId: modelId,
+    application, task,
+    originalSkillRegistry: contract.lightweightProfile.skillsBinding.canonicalRepository,
+    selectionOwner: contract.lightweightProfile.skillsBinding.selectionOwner,
+    authorityOwner: contract.lightweightProfile.skillsBinding.authorityOwner,
+    route: Object.freeze([...profile.skillsRoute]),
+    boundedCapability: taskEntry.task,
+    registeredSkillIdentity: 'NOT_RESOLVED',
+    modelMayAuthorizeTools: false,
+    toolGrant: 'NOT_CONFERRED',
+    formulaAdmission: 'NOT_EVALUATED',
+    runtimeSkillsList: 'NOT_CALLED',
+    runtimeSkillInstructions: 'NOT_LOADED',
+    physicalInference: 'NOT_EXECUTED',
+    independentVeritas: 'NOT_EVALUATED',
+    mutation: 'NOT_EXECUTED'
+  });
+}

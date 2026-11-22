@@ -76,3 +76,30 @@ This is a **requested schedule design**, not a deployed job. The existing Runtim
 This PR stages only the fail-closed Model Hub contract and read-only planning library/tests. Original operator/owner must complete: correct catalog endpoint deployment; real host inventory; all five source hashes; original PR #3–#6 review and compatibility; model-specific quantization feasibility and baseline; full native LeeWay software-GPU execution; authorized two-model warm/pause policy; one real source→infographic; original Foundry/IDE/CRM/Logistics task probes; existing Runtime every-three-hour job; Formula PRE, independent Veritas, Receipt/Continuum/Learning readback; disconnected-device recovery and negative tests.
 
 Nothing in this document certifies those physical gates. **Checkpoint: SOURCE CANDIDATE / NOT PRODUCTION ADMITTED.**
+
+
+## Amendment — compact Qwen3-first deployment and Agent Skills integration
+
+The Creator's later correction modifies the **active selection and memory priority**, not ownership of previously admitted models. Preserve original five-model team history and all held source and weights; do not force giant vision/video assets to load by default. The lightweight profile is embedded as `lightweightProfile` in the EXISTING draft contract `contracts/creator-five-model-assistance.v1.json`, not a separate model hub or independent registry.
+
+**Three low-footprint model candidates (published Ollama download size, not RAM or proven compression):**
+
+| Selected capability | Candidate | Published nominal package | Current admission |
+| --- | --- | ---: | --- |
+| Bounded classification and brief routine language | Gemma 3 270M Q4 | 292 MB | In canonical catalog, physical install not proven |
+| Fast Qwen family reasoning | Qwen3 0.6B Q4 | 523 MB | Public source and historical Android CPU test; NOT in live Model Hub catalog, intake needed |
+| IDE/Office richer text and planning | Qwen3 1.7B Q4 | 1,400 MB | Public source, NOT in live Model Hub catalog, intake needed |
+
+Approximate sum: **2,215 MB (2.215 decimal GB) stored model packages**, before tokenizer/runtime-specific files, duplicate cache copies, memory, OS, KV caches, model context and workspace. **Do not claim that 2.2 GB is a RAM limit, an already installed package inventory, or simultaneous model residency.** Use original Provider Fabric and owner approved path for Qwen3 0.6/1.7 intake only after real host hash, provenance, license and Formula/Veritas gates. Qwen official sources carry Apache-2.0; Gemma carries its own terms. Ollama official catalog at `https://ollama.com/library/qwen3` publishes 0.6B (523 MB), 1.7B (1.4 GB) and 4B (2.5 GB); `https://ollama.com/library/gemma3/tags` lists 270M (292 MB). Do not silently convert `qwen3:1.7b` into another exact quant identity without hashing the actual fetched blob.
+
+**Reuse as real local candidate without a new model:** Gemma3 1B and Qwen2.5 0.5B were historically installed and may be available sooner than uninstalled Qwen3 0.6/1.7. Current physical model list/loaded state remain unprobed. Existing Qwen3 4B (2,497,280,256 bytes as recorded in original SHA manifest) is reserved on-demand, not a hot default. Qwen3-VL and Wan2.1 remain preserved cold. Qwen3.5 0.8B is an optional ~1.2 GB multimodal source candidate for later visual comparison; its image input path and native LeeWay backend are unqualified. Do NOT promise small text-only models generate full video or replace visual encoders; deterministic infographics, verified CCTV and video editing are original app/media renderer capabilities.
+
+**Skills — connect through the original authority, NOT direct model permission:** Every compact model, before or after its real installation, requests logical capabilities through
+`Agent Lee/Machine Consciousness → Formula → Universal Capability Kernel → leeway-skill-orchestrator → leeway-tool-gateway → existing Runtime Fabric → authorized Device Bridge → independent Veritas → Receipt Authority`.
+The same graph applies to each model. This PR implements **read-only source plans**, *not* runtime-connected skill invocation. Skill `SKILL.md` presence does not mean availability to the current host, and a model's generated JSON/command never gives it device/process/account authority. Existing app capability requests must still resolve genuine runtime skill IDs, correct tenants, scopes and host grants. Negative tests enforce this.
+
+**GitHub CPU truth:** GitHub Pages serves the static Tablet/widget/catalog but does NOT provide an inference process or live server-side CPU. GitHub Actions runners are temporary job machines; they can run isolated permitted CI and bounded evaluation within GitHub job policies but are **not a continuously available sovereign inference host**. If a future approved browser-only inference engine uses a model delivered via authorized static URLs, its computation occurs on the user's device CPU/WebAssembly or GPU/WebGPU, not GitHub-hosted CPU, and requires real security, license and quality tests. Use actual existing LeeWay CPU/RAM software-GPU engines, qualified devices or authorized always-on compute for core live requests.
+
+**Test order:** (1) finish the actual hosted-catalog HTTP 402 repair and physical execute authorization; (2) read real Ollama installed/loaded inventories; (3) verify 270M/Gemma1B/Qwen2.5 existing presence; (4) run Qwen3 0.6/1.7 owner-approved intake with hash/licensing; (5) baseline short tasks and quality per application against 4B on-demand; (6) verify genuine Formula-governed LeeWay CPU inference and skills/tool execution through original Runtime; (7) independent poststate, Veritas and receipt/Continuum/Learning readback; (8) activate app acceptance and 3-hour scheduled reviews only when the original owner runtime is qualified. Keep backups and rollback to the last-good variant.
+
+**Checkpoint remains SOURCE_CANDIDATE / NOT_EXECUTED physically.** No memory, model speed, skill activation, 3-hour job execution, GitHub-side persistent CPU, Veritas or Receipt claim was created by this source amendment.

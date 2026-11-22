@@ -127,8 +127,8 @@ export function inspectCreatorLightweightProfile({
   inspectCreatorFiveModelRoster({catalog, runtimeManifest, contract});
   const profile = contract.lightweightProfile;
   const skill = profile?.skillsBinding;
-  if (profile?.profileId !== 'LEEWAY_QWEN3_COMPACT_CPU_FIRST' ||
-      profile?.status !== 'CANDIDATE_SELECTION_NOT_INSTALLED_OR_RUNNING' ||
+  if (profile?.profileId !== 'LEEWAY_QWEN3_TRINITY_COMPACT_ASSISTIVE' ||
+      profile?.status !== 'CREATOR_SELECTED_CANDIDATE_NOT_INSTALLED_OR_RUNNING' ||
       !Array.isArray(profile?.candidateCore) || profile.candidateCore.length !== 3 ||
       skill?.canonicalRepository !== '4citeB4U/LeeWay-Agent-Skills' ||
       skill?.selectionOwner !== 'skills/leeway-skill-orchestrator/SKILL.md' ||
@@ -142,13 +142,21 @@ export function inspectCreatorLightweightProfile({
     throw Error('CREATOR_LIGHTWEIGHT_AUTHORITY_CONTRACT_INVALID');
   }
   const expected = [
-    'gemma-3-270m-q4km', 'qwen3-0.6b-q4km', 'qwen3-1.7b-q4km'
+    'qwen3-0.6b-q4km', 'qwen3-1.7b-q4km', 'qwen3.5-0.8b'
   ];
   if (profile.candidateCore.some((item, index) => item.modelId !== expected[index] ||
       !idValid(item.modelId) || !(item.publishedPackageMegabytes > 0) ||
       !Number.isFinite(item.publishedPackageMegabytes)) ||
       profile.candidateCore.reduce((sum, item) => sum + item.publishedPackageMegabytes, 0) !==
-        profile.targetPublishedPackageMegabytes) {
+        profile.targetPublishedPackageMegabytes ||
+      profile.candidateCore.reduce((sum, item) => sum + item.publishedPackageMegabytesMaximum, 0) !==
+        profile.targetPublishedPackageMegabytesMaximum ||
+      !profile.candidateCore.every(item =>
+        Number.isFinite(item.publishedPackageMegabytesMaximum) &&
+        item.publishedPackageMegabytesMaximum >= item.publishedPackageMegabytes &&
+        Array.isArray(item.modalities) && item.modalities.includes('text') &&
+        item.toolAuthority === 'NONE') ||
+      profile.candidateCore[2].modalities.join(',') !== 'text,image') {
     throw Error('CREATOR_LIGHTWEIGHT_MODEL_OR_SIZE_MISMATCH');
   }
   const selected = profile.candidateCore.map(item => {
@@ -164,6 +172,8 @@ export function inspectCreatorLightweightProfile({
       intakeRequired: !registered,
       providerTag: item.providerTag,
       sourceStatus: item.status,
+      modalities: Object.freeze([...item.modalities]),
+      actualPackageBytes: 'NOT_MEASURED',
       installed: 'NOT_ESTABLISHED',
       loaded: 'NOT_ESTABLISHED',
       formulaEvaluated: false,
@@ -177,7 +187,12 @@ export function inspectCreatorLightweightProfile({
     status: profile.status,
     candidateCount: selected.length,
     nominalPackageMegabytes: profile.targetPublishedPackageMegabytes,
+    maximumNominalPackageMegabytes: profile.targetPublishedPackageMegabytesMaximum,
     nominalBytesAreNotRam: true,
+    visionProviderQualified: false,
+    weightTrainingStarted: false,
+    sourceOriginalWeightsChanged: false,
+    adaptationPromiseIsSizeProof: false,
     models: Object.freeze(selected),
     skillsRoute: Object.freeze([...skill.flow]),
     skillsConnection: skill.runtimeBindingState,
@@ -224,5 +239,77 @@ export function planCreatorSkillAssistance({
     physicalInference: 'NOT_EXECUTED',
     independentVeritas: 'NOT_EVALUATED',
     mutation: 'NOT_EXECUTED'
+  });
+}
+
+
+/**
+ * Report the Creator's controlled LoRA/QLoRA and multimodal deployment gates.
+ * A source plan cannot mutate or admit quantized weights.
+ */
+export function planCreatorWeightAdaptation({
+  modelId, catalog, runtimeManifest, contract = loadCreatorFiveModelContract()
+} = {}) {
+  const profile = inspectCreatorLightweightProfile({catalog, runtimeManifest, contract});
+  const policy = contract.lightweightProfile.sizePreservingAdaptation;
+  const vision = contract.lightweightProfile.visionInputGate;
+  if (!profile.models.some(model => model.modelId === modelId) ||
+      policy?.sourceWeightMutation !== 'FORBIDDEN' ||
+      policy?.trainingJobStarts !== 'NOT_EXECUTED' ||
+      policy?.parameterCountIsNotFileSizeGuarantee !== true ||
+      policy?.stagedAndOriginalWeightsMayExceedRuntimeBudget !== true ||
+      policy?.requireCandidateBytesAtMostMeasuredBasePackageBytes !== true ||
+      policy?.repeatMergeIntoQuantizedWeights !== 'FORBIDDEN_WITHOUT_FULL_BASE_RELOAD_AND_REEVALUATION' ||
+      policy?.noProductionAutoPromotion !== true ||
+      !Array.isArray(policy?.mergeWorkflow) ||
+      vision?.currentVisionAdapter !== 'NOT_IMPLEMENTED_OR_QUALIFIED_IN_LEEWAY_MODEL_HUB' ||
+      vision?.visionOrScreenExecuteAllowed !== false) {
+    throw Error('CREATOR_WEIGHT_ADAPTATION_AUTHORITY_INVALID');
+  }
+  return Object.freeze({
+    status: 'ADAPTATION_DESIGN_ONLY_NO_WEIGHT_OPERATIONS',
+    modelId, sourceWeights: 'IMMUTABLE',
+    workflow: Object.freeze([...policy.mergeWorkflow]),
+    outputFormat: 'REQUIRES_ARCHITECTURE_SPECIFIC_RUNTIME_QUALIFICATION',
+    baseWeightSha: 'NOT_READ_BACK',
+    candidateWeightSha: 'NOT_GENERATED',
+    exactBasePackageBytes: 'NOT_MEASURED',
+    exactCandidatePackageBytes: 'NOT_MEASURED',
+    perModelFootprintCap: 'NOT_SET_UNTIL_BASELINE_BYTES_MEASURED',
+    requireQualityAndLatencyRegression: true,
+    fullTrainingWorkspaceNotBoundedByRuntimePackage: true,
+    verifyTextVisionInput: modelId === 'qwen3.5-0.8b' ? 'BLOCKED_IMAGE_PATH_PENDING' : 'TEXT_ONLY',
+    modelTraining: 'NOT_EXECUTED',
+    formula: 'NOT_EVALUATED',
+    gpu: 'NOT_EXECUTED',
+    independentVeritas: 'NOT_VERIFIED',
+    receipt: 'NOT_CREATED',
+    mutation: 'NOT_EXECUTED'
+  });
+}
+
+/**
+ * Compare untrusted reported package sizes; strictly never certify model
+ * fitness, output correctness, an atomic replacement or Veritas completion.
+ */
+export function assessCreatorAdaptationPackageBytes({
+  baselineBytes, candidateBytes
+} = {}) {
+  if (!Number.isSafeInteger(baselineBytes) || baselineBytes <= 0 ||
+      !Number.isSafeInteger(candidateBytes) || candidateBytes <= 0) {
+    return Object.freeze({
+      status:'BLOCKED',reason:'EXACT_PACKAGE_BYTE_MEASUREMENTS_REQUIRED',
+      promotion:'NOT_AUTHORIZED',mutation:'NOT_EXECUTED'
+    });
+  }
+  return Object.freeze({
+    status:candidateBytes <= baselineBytes ? 'SIZE_WITHIN_REPORTED_CAP_NOT_ADMITTED' : 'CANDIDATE_EXCEEDS_REPORTED_SIZE_CAP',
+    baselineBytes, candidateBytes, differenceBytes:candidateBytes - baselineBytes,
+    measurementsIndependentlyVerified:false,
+    modelQuality:'NOT_EVALUATED',
+    modelInference:'NOT_EXECUTED',
+    originalWeightReplacement:'FORBIDDEN',
+    promotion:'NOT_AUTHORIZED',
+    mutation:'NOT_EXECUTED'
   });
 }

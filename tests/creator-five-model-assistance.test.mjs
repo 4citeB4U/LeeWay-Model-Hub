@@ -18,7 +18,9 @@ import {
   inspectCreatorFiveModelRoster,
   planCreatorFactoryTask,
   describeCreatorLearningReview,
-  loadCreatorFiveModelContract
+  loadCreatorFiveModelContract,
+  inspectCreatorLightweightProfile,
+  planCreatorSkillAssistance
 } from '../src/creator-five-model-assistance.mjs';
 
 const catalog = JSON.parse(readFileSync(new URL('../catalog/models.json', import.meta.url), 'utf8'));
@@ -134,4 +136,91 @@ test('three-hour evaluation is explicitly unscheduled and is not autonomous weig
   assert.equal(r.modelWeightTraining,'NOT_AUTHORIZED_OR_EXECUTED');
   assert.equal(r.learningAdmission,'NOT_EXECUTED');
   assert.equal(r.mutation,'NOT_EXECUTED');
+});
+
+
+test('compact Qwen3-first profile is small, three candidates, and never reports actual residency', () => {
+  const report = inspectCreatorLightweightProfile(sources);
+  assert.equal(report.profileId, 'LEEWAY_QWEN3_COMPACT_CPU_FIRST');
+  assert.equal(report.nominalPackageMegabytes, 2215);
+  assert.equal(report.nominalBytesAreNotRam, true);
+  assert.deepEqual(report.models.map(m => m.modelId), [
+    'gemma-3-270m-q4km','qwen3-0.6b-q4km','qwen3-1.7b-q4km'
+  ]);
+  for (const m of report.models) {
+    assert.equal(m.installed,'NOT_ESTABLISHED');
+    assert.equal(m.loaded,'NOT_ESTABLISHED');
+    assert.equal(m.skillsConnectedAtRuntime,false);
+    assert.equal(m.leeWayGpuExecuted,false);
+    assert.equal(m.inferenceStarted,false);
+  }
+  assert.equal(report.mutation,'NOT_EXECUTED');
+});
+
+test('existing Gemma catalog registration is distinct from new Qwen3 import candidates', () => {
+  const p = inspectCreatorLightweightProfile(sources);
+  assert.equal(p.models[0].registeredInModelHub, true);
+  assert.equal(p.models[0].intakeRequired, false);
+  assert.equal(p.models[1].registeredInModelHub, false);
+  assert.equal(p.models[1].intakeRequired, true);
+  assert.equal(p.models[2].registeredInModelHub, false);
+  assert.equal(p.models[2].intakeRequired, true);
+  assert.equal(p.automaticDownloads, false);
+  assert.equal(p.productionCpuProvider,'NOT_VERIFIED');
+});
+
+test('original Qwen3 4B and big vision/video assets are preserved as on-demand or cold', () => {
+  const p=inspectCreatorLightweightProfile(sources);
+  assert.ok(p.retainedOnDemand.includes('qwen3-4b'));
+  assert.ok(p.retainedCold.includes('qwen3-vl-8b-instruct'));
+  assert.ok(p.retainedCold.includes('wan2.1-t2v-1.3b'));
+  assert.ok(contract.primaryModels.some(m => m.id === 'qwen3-vl-8b-instruct'));
+  assert.ok(contract.primaryModels.some(m => m.id === 'wan2.1-t2v-1.3b'));
+});
+
+test('each compact candidate routes skill intent through original governed orchestrator', () => {
+  for (const model of inspectCreatorLightweightProfile(sources).models) {
+    const plan = planCreatorSkillAssistance({
+      ...sources, modelId:model.modelId, application:'IDE',task:'plan_code_review_and_test'
+    });
+    assert.equal(plan.selectionOwner,'skills/leeway-skill-orchestrator/SKILL.md');
+    assert.equal(plan.authorityOwner,'skills/leeway-tool-gateway/SKILL.md');
+    assert.equal(plan.originalSkillRegistry,'4citeB4U/LeeWay-Agent-Skills');
+    assert.equal(plan.status,'SKILL_GRAPH_DISCOVERY_REQUEST_NOT_DISPATCHED');
+    assert.equal(plan.runtimeSkillInstructions,'NOT_LOADED');
+    assert.equal(plan.runtimeSkillsList,'NOT_CALLED');
+    assert.equal(plan.toolGrant,'NOT_CONFERRED');
+    assert.equal(plan.modelMayAuthorizeTools,false);
+    assert.equal(plan.physicalInference,'NOT_EXECUTED');
+    assert.equal(plan.mutation,'NOT_EXECUTED');
+  }
+});
+
+test('skill planner denies models outside compact and retained sets', () => {
+  assert.throws(() => planCreatorSkillAssistance({
+    ...sources,modelId:'random-unapproved-model',application:'IDE',task:'plan_code_review_and_test'
+  }),/CREATOR_LIGHTWEIGHT_MODEL_NOT_IN_APPROVED_PROFILE/);
+  assert.throws(() => planCreatorSkillAssistance({
+    ...sources,modelId:'qwen3-0.6b-q4km',application:'OFFICE',task:'undeclared_task'
+  }),/CREATOR_FACTORY_TASK_NOT_REGISTERED/);
+});
+
+test('compact selection fails closed if model size, identity or actual authority is rewritten', () => {
+  const changedSize=structuredClone(contract);
+  changedSize.lightweightProfile.candidateCore[1].publishedPackageMegabytes=12;
+  assert.throws(() => inspectCreatorLightweightProfile({...sources,contract:changedSize}),/CREATOR_LIGHTWEIGHT_MODEL_OR_SIZE_MISMATCH/);
+  const forgedScope=structuredClone(contract);
+  forgedScope.lightweightProfile.skillsBinding.skillGrantFromModel=true;
+  assert.throws(() => inspectCreatorLightweightProfile({...sources,contract:forgedScope}),/CREATOR_LIGHTWEIGHT_AUTHORITY_CONTRACT_INVALID/);
+  const falseRegistration=structuredClone(contract);
+  falseRegistration.lightweightProfile.candidateCore[1].sourceType='ALREADY_IN_CANONICAL_CATALOG';
+  assert.throws(() => inspectCreatorLightweightProfile({...sources,contract:falseRegistration}),/CREATOR_LIGHTWEIGHT_SOURCE_CLASSIFICATION_INVALID/);
+});
+
+test('GitHub Pages and Actions never count as persistent LeeWay inference CPU', () => {
+  assert.equal(contract.lightweightProfile.githubCpu.claimGitHubAsPersistentCpu,false);
+  assert.match(contract.lightweightProfile.githubCpu.pages,/STATIC/);
+  assert.match(contract.lightweightProfile.githubCpu.actions,/EPHEMERAL/);
+  assert.equal(contract.lightweightProfile.modelIntake.automaticInference,false);
+  assert.equal(contract.lightweightProfile.skillsBinding.runtimeBindingState,'SOURCE_CONTRACT_ONLY_NOT_CONNECTED');
 });

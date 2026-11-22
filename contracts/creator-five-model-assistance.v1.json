@@ -3,8 +3,8 @@
   "authority": "LEEWAY_MODEL_HUB_SELECTION_ONLY",
   "status": "SOURCE_CONTRACT_NO_ADMITTED_EXECUTION",
   "governance": {
-    "modelRole": "OPTIONAL_BOUNDED_TEACHER_AND_CAPABILITY_PROVIDER",
-    "decisionAuthority": "LEEWAY_MACHINE_CONSCIOUSNESS_AGENT_LEE_UNDER_CREATOR_AND_RUNTIME",
+    "modelRole": "OPTIONAL_EVIDENCE_TEACHING_CRITIQUE_AND_WORKER_DESIGN_SUPPORT_NEVER_EXECUTION_OWNER",
+    "decisionAuthority": "LEEWAY_MACHINE_CONSCIOUSNESS_UNDER_CREATOR_WITH_AGENT_LEE_AS_USER_INTERFACE",
     "runtimeAuthority": "EXISTING_LEEWAY_RUNTIME_FABRIC",
     "computeAuthority": "leeway.gpu.service",
     "formulaAuthority": "EXISTING_LEEWAY_FORMULA",
@@ -18,7 +18,12 @@
     "modelsMayWriteProcedureOrWeightsWithoutApproval": false,
     "modelOutputTrust": "UNTRUSTED_CANDIDATE_UNTIL_GROUNDED_VALIDATED_AND_AUTHORIZED",
     "externalInferenceFallback": "FORBIDDEN_UNLESS_SEPARATELY_APPROVED",
-    "sourceManifestIsNotPhysicalEvidence": true
+    "sourceManifestIsNotPhysicalEvidence": true,
+    "modelTaskOwnership": "NONE_NATIVE_LEEWAY_WORKERS_EXECUTE_UNDER_CONSCIOUSNESS",
+    "modelVeritasIndependence": "MODEL_CRITIQUE_NEVER_COUNTS_AS_INDEPENDENT_VERITAS",
+    "allowModelsToBuildWorkersDirectly": false,
+    "allowModelsToSelfModifyEmployeePermissions": false,
+    "allowModelsToWriteLearningDirectly": false
   },
   "primaryModels": [
     {
@@ -65,7 +70,10 @@
       "outputOwner": "LEEWAY_OFFICE_SUITES_RENDERER",
       "deterministicOutputRequired": true,
       "dataPolicy": "CITE_EACH_CLAIM_TO_APPROVED_SOURCE",
-      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
+      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
+      "modelMayRenderOrPublish": false
     },
     {
       "application": "OFFICE",
@@ -78,7 +86,10 @@
       "outputOwner": "LEEWAY_OFFICE_SUITES",
       "deterministicOutputRequired": false,
       "dataPolicy": "HUMAN_REVIEW_BEFORE_EXTERNAL_USE",
-      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
+      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
+      "modelMayRenderOrPublish": false
     },
     {
       "application": "CONTENT_FOUNDRY",
@@ -92,7 +103,10 @@
       "outputOwner": "LEEWAY_CONTENT_FOUNDRY",
       "deterministicOutputRequired": true,
       "dataPolicy": "VERIFY_BRAND_RIGHTS_AND_SOURCE",
-      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
+      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
+      "modelMayRenderOrPublish": false
     },
     {
       "application": "CONTENT_FOUNDRY",
@@ -105,7 +119,10 @@
       "outputOwner": "LEEWAY_CONTENT_FOUNDRY",
       "deterministicOutputRequired": false,
       "dataPolicy": "LICENSE_AND_POST_OUTPUT_REVIEW_REQUIRED",
-      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
+      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
+      "modelMayRenderOrPublish": false
     },
     {
       "application": "IDE",
@@ -119,7 +136,10 @@
       "outputOwner": "LEEWAY_IDE",
       "deterministicOutputRequired": true,
       "dataPolicy": "COMMAND_EXECUTION_ONLY_BY_AUTHORIZED_RUNTIME",
-      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
+      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
+      "modelMayRenderOrPublish": false
     },
     {
       "application": "CRM_ERP",
@@ -133,7 +153,10 @@
       "outputOwner": "LEEWAY_CRM_ERP",
       "deterministicOutputRequired": true,
       "dataPolicy": "CONTACT_CONSENT_TENANT_ISOLATION_AND_SEND_APPROVAL",
-      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
+      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
+      "modelMayRenderOrPublish": false
     },
     {
       "application": "LOGISTICS",
@@ -147,7 +170,10 @@
       "outputOwner": "LEEWAY_LOGISTICS",
       "deterministicOutputRequired": true,
       "dataPolicy": "LICENSED_LIVE_CCTV_FEEDS_AND_DRIVER_DISTRACTION_RESTRICTIONS",
-      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
+      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
+      "modelMayRenderOrPublish": false
     },
     {
       "application": "LOGISTICS",
@@ -160,7 +186,10 @@
       "outputOwner": "LEEWAY_LOGISTICS",
       "deterministicOutputRequired": true,
       "dataPolicy": "CURRENT_AUTHORIZED_BUSINESS_AND_AD_SOURCE_REQUIRED",
-      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
+      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
+      "modelMayRenderOrPublish": false
     }
   ],
   "artifactPlan": {
@@ -479,6 +508,42 @@
       "tabletEyes": "ANALYZE_APPROVED_IMAGE_PIXELS_AND_UI_CAPTURES_ONLY_AFTER_MULTIMODAL_PROVIDER_ADMISSION",
       "otherCapabilities": "OFFICE_INFOGRAPHIC_VIDEO_RENDER_CRM_SEND_AND_ROUTE_CAMERAS_REMAIN_OWNED_BY_ORIGINAL_APP_AND_DEVICE_SERVICES",
       "noExternalModelApi": true
+    },
+    "consciousnessFirstSupport": {
+      "ownerRepo": "4citeB4U/Machine-Consciousness",
+      "ownerContract": "training/contracts/leeway-universal-employee-consciousness.v1.json",
+      "ownerCoreType": "DETERMINISTIC_NON_LLM_MACHINE_CONSCIOUSNESS",
+      "agentLeeRole": "CREATOR_FACING_IDENTITY_AND_CONVERSATION_INTERFACE_NOT_MODEL_HUB_IDENTITY",
+      "modelTeamRole": "COOPERATIVE_INSPECTION_CRITIQUE_DESIGN_AND_TEACHING_ADVISORS",
+      "modelTeamCanIssueActions": false,
+      "modelTeamCanPromoteSkills": false,
+      "modelTeamCanCreateWorkers": false,
+      "modelTeamCanVerifyIndependently": false,
+      "modelTeamCanGrantTools": false,
+      "modelsRequiredForNativeAction": false,
+      "externalProviderCannotDefineIdentity": true,
+      "inspectionOwner": "EXISTING_LEEWAY_RUNTIME_PERSISTENT_WORKPLANE",
+      "inspectionCadenceHours": 3,
+      "inspectionSchedulerState": "NOT_REGISTERED_OR_LIVE_VERIFIED",
+      "originalSkillFactory": "skills/leeway-skill-factory/SKILL.md",
+      "originalWorkerPlanOwner": "skills/leeway-parallel-workplane/SKILL.md",
+      "originalToolGateway": "skills/leeway-tool-gateway/SKILL.md",
+      "nativeExecutionOwner": "LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_RUNTIME",
+      "nativeRepairLoop": [
+        "ORIGINAL_RUNTIME_OR_HOST_OBSERVES_FACTS",
+        "MODEL_ADVISORS_CRITIQUE_AND_PROPOSE_WITH_SOURCE_REFERENCES",
+        "MACHINE_CONSCIOUSNESS_AGGREGATES_EVIDENCE_AND_CHOOSES_TARGET",
+        "EXISTING_CAPABILITY_RESILIENCE_AND_SKILL_FACTORY_CHECK_REUSE_FIRST",
+        "EXISTING_RUNTIME_W02_AND_TOOL_GATEWAY_EXECUTE_ONLY_AFTER_ORIGINAL_FORMULA_AND_OWNER_GRANTS",
+        "INDEPENDENT_VERITAS_PRE_POST_MEASURES_OUTCOME",
+        "CANONICAL_RECEIPT_AUTHORITY_AND_CONTINUUM_READBACK",
+        "ELIGIBLE_VERIFIED_LEARNING_RETURNS_AS_SKILL_TO_MACHINE_CONSCIOUSNESS"
+      ],
+      "workerRepairStatus": "SOURCE_INTENT_ONLY_NO_WORKER_CREATED",
+      "actualModelCooperation": "NOT_EXECUTED",
+      "actualNativeExecution": "NOT_EXECUTED",
+      "performanceAmbition": "MEASURED_TASK_COMPETENCE_VS_HELD_OUT_16B_REFERENCE_NO_PARAMETER_EQUIVALENCE_CLAIM",
+      "minimumOutputProof": "SOURCE_AND_VERSIONED_WORKER_ACCEPTANCE_EVIDENCE_REQUIRED"
     }
   }
 }

@@ -71,9 +71,18 @@
       "deterministicOutputRequired": true,
       "dataPolicy": "CITE_EACH_CLAIM_TO_APPROVED_SOURCE",
       "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
-      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "modelParticipation": "COOPERATIVE_INSPECTION_CRITIQUE_DESIGN_TEACHING_ONLY",
       "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
-      "modelMayRenderOrPublish": false
+      "modelMayRenderOrPublish": false,
+      "activeAdvisoryModels": [
+        "qwen3-0.6b-q4km",
+        "qwen3-1.7b-q4km",
+        "qwen3.5-0.8b"
+      ],
+      "modelsAreRequiredForNativeWork": false,
+      "modelReportsCannotVerifyExecution": true,
+      "modelReportsCannotCreateWorkers": true,
+      "nativeExecutionOwner": "LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_NATIVE_APP_WORKER"
     },
     {
       "application": "OFFICE",
@@ -87,9 +96,18 @@
       "deterministicOutputRequired": false,
       "dataPolicy": "HUMAN_REVIEW_BEFORE_EXTERNAL_USE",
       "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
-      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "modelParticipation": "COOPERATIVE_INSPECTION_CRITIQUE_DESIGN_TEACHING_ONLY",
       "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
-      "modelMayRenderOrPublish": false
+      "modelMayRenderOrPublish": false,
+      "activeAdvisoryModels": [
+        "qwen3-0.6b-q4km",
+        "qwen3-1.7b-q4km",
+        "qwen3.5-0.8b"
+      ],
+      "modelsAreRequiredForNativeWork": false,
+      "modelReportsCannotVerifyExecution": true,
+      "modelReportsCannotCreateWorkers": true,
+      "nativeExecutionOwner": "LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_NATIVE_APP_WORKER"
     },
     {
       "application": "CONTENT_FOUNDRY",
@@ -104,9 +122,18 @@
       "deterministicOutputRequired": true,
       "dataPolicy": "VERIFY_BRAND_RIGHTS_AND_SOURCE",
       "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
-      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "modelParticipation": "COOPERATIVE_INSPECTION_CRITIQUE_DESIGN_TEACHING_ONLY",
       "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
-      "modelMayRenderOrPublish": false
+      "modelMayRenderOrPublish": false,
+      "activeAdvisoryModels": [
+        "qwen3-0.6b-q4km",
+        "qwen3-1.7b-q4km",
+        "qwen3.5-0.8b"
+      ],
+      "modelsAreRequiredForNativeWork": false,
+      "modelReportsCannotVerifyExecution": true,
+      "modelReportsCannotCreateWorkers": true,
+      "nativeExecutionOwner": "LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_NATIVE_APP_WORKER"
     },
     {
       "application": "CONTENT_FOUNDRY",
@@ -120,9 +147,18 @@
       "deterministicOutputRequired": false,
       "dataPolicy": "LICENSE_AND_POST_OUTPUT_REVIEW_REQUIRED",
       "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
-      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "modelParticipation": "COOPERATIVE_INSPECTION_CRITIQUE_DESIGN_TEACHING_ONLY",
       "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
-      "modelMayRenderOrPublish": false
+      "modelMayRenderOrPublish": false,
+      "activeAdvisoryModels": [
+        "qwen3-0.6b-q4km",
+        "qwen3-1.7b-q4km",
+        "qwen3.5-0.8b"
+      ],
+      "modelsAreRequiredForNativeWork": false,
+      "modelReportsCannotVerifyExecution": true,
+      "modelReportsCannotCreateWorkers": true,
+      "nativeExecutionOwner": "LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_NATIVE_APP_WORKER"
     },
     {
       "application": "IDE",
@@ -137,9 +173,18 @@
       "deterministicOutputRequired": true,
       "dataPolicy": "COMMAND_EXECUTION_ONLY_BY_AUTHORIZED_RUNTIME",
       "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
-      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "modelParticipation": "COOPERATIVE_INSPECTION_CRITIQUE_DESIGN_TEACHING_ONLY",
       "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
-      "modelMayRenderOrPublish": false
+      "modelMayRenderOrPublish": false,
+      "activeAdvisoryModels": [
+        "qwen3-0.6b-q4km",
+        "qwen3-1.7b-q4km",
+        "qwen3.5-0.8b"
+      ],
+      "modelsAreRequiredForNativeWork": false,
+      "modelReportsCannotVerifyExecution": true,
+      "modelReportsCannotCreateWorkers": true,
+      "nativeExecutionOwner": "LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_NATIVE_APP_WORKER"
     },
     {
       "application": "CRM_ERP",
@@ -154,9 +199,18 @@
       "deterministicOutputRequired": true,
       "dataPolicy": "CONTACT_CONSENT_TENANT_ISOLATION_AND_SEND_APPROVAL",
       "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
-      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "modelParticipation": "COOPERATIVE_INSPECTION_CRITIQUE_DESIGN_TEACHING_ONLY",
       "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
-      "modelMayRenderOrPublish": false
+      "modelMayRenderOrPublish": false,
+      "activeAdvisoryModels": [
+        "qwen3-0.6b-q4km",
+        "qwen3-1.7b-q4km",
+        "qwen3.5-0.8b"
+      ],
+      "modelsAreRequiredForNativeWork": false,
+      "modelReportsCannotVerifyExecution": true,
+      "modelReportsCannotCreateWorkers": true,
+      "nativeExecutionOwner": "LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_NATIVE_APP_WORKER"
     },
     {
       "application": "LOGISTICS",
@@ -171,9 +225,18 @@
       "deterministicOutputRequired": true,
       "dataPolicy": "LICENSED_LIVE_CCTV_FEEDS_AND_DRIVER_DISTRACTION_RESTRICTIONS",
       "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
-      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "modelParticipation": "COOPERATIVE_INSPECTION_CRITIQUE_DESIGN_TEACHING_ONLY",
       "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
-      "modelMayRenderOrPublish": false
+      "modelMayRenderOrPublish": false,
+      "activeAdvisoryModels": [
+        "qwen3-0.6b-q4km",
+        "qwen3-1.7b-q4km",
+        "qwen3.5-0.8b"
+      ],
+      "modelsAreRequiredForNativeWork": false,
+      "modelReportsCannotVerifyExecution": true,
+      "modelReportsCannotCreateWorkers": true,
+      "nativeExecutionOwner": "LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_NATIVE_APP_WORKER"
     },
     {
       "application": "LOGISTICS",
@@ -187,9 +250,18 @@
       "deterministicOutputRequired": true,
       "dataPolicy": "CURRENT_AUTHORIZED_BUSINESS_AND_AD_SOURCE_REQUIRED",
       "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT",
-      "modelParticipation": "ADVISORY_CRITIQUE_AND_TEACHING_ONLY",
+      "modelParticipation": "COOPERATIVE_INSPECTION_CRITIQUE_DESIGN_TEACHING_ONLY",
       "executionAuthority": "MACHINE_CONSCIOUSNESS_VIA_ORIGINAL_APP_NATIVE_WORKER",
-      "modelMayRenderOrPublish": false
+      "modelMayRenderOrPublish": false,
+      "activeAdvisoryModels": [
+        "qwen3-0.6b-q4km",
+        "qwen3-1.7b-q4km",
+        "qwen3.5-0.8b"
+      ],
+      "modelsAreRequiredForNativeWork": false,
+      "modelReportsCannotVerifyExecution": true,
+      "modelReportsCannotCreateWorkers": true,
+      "nativeExecutionOwner": "LEEWAY_MACHINE_CONSCIOUSNESS_VIA_EXISTING_NATIVE_APP_WORKER"
     }
   ],
   "artifactPlan": {
@@ -543,7 +615,20 @@
       "actualModelCooperation": "NOT_EXECUTED",
       "actualNativeExecution": "NOT_EXECUTED",
       "performanceAmbition": "MEASURED_TASK_COMPETENCE_VS_HELD_OUT_16B_REFERENCE_NO_PARAMETER_EQUIVALENCE_CLAIM",
-      "minimumOutputProof": "SOURCE_AND_VERSIONED_WORKER_ACCEPTANCE_EVIDENCE_REQUIRED"
+      "minimumOutputProof": "SOURCE_AND_VERSIONED_WORKER_ACCEPTANCE_EVIDENCE_REQUIRED",
+      "derivedExpertRouting": {
+        "canonicalOwner": "4citeB4U/LeeWay-Agent-Skills",
+        "originalCapabilityKernel": "skills/leeway-universal-capability-kernel/SKILL.md",
+        "originalOrchestrator": "skills/leeway-skill-orchestrator/SKILL.md",
+        "candidateDerivedProjection": "sdk/derived-skill-expert-routing.js",
+        "candidateSourceReview": "https://github.com/4citeB4U/LeeWay-Agent-Skills/pull/47",
+        "indexIsOnlySourceDerivedMetadata": true,
+        "selectTopKAtMost": 8,
+        "hydrateRequiresOriginalRuntimeAuthorization": true,
+        "modelsMaySelectCandidatesButNotAuthorizeOrExecute": true,
+        "actualDynamicModelToSkillIntegration": "NOT_EXECUTED",
+        "noSecondSkillRegistry": true
+      }
     }
   }
 }

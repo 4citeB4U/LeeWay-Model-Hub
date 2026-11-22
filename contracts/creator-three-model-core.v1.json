@@ -1,0 +1,72 @@
+{
+  "schema": "leeway.model-hub.active-three-core.v1",
+  "serviceId": "leeway.gpu.service",
+  "defaultBackend": "LEEWAY_GPU",
+  "fallback": "DENY_UNADMITTED",
+  "modelAuthority": "NONE",
+  "slots": [
+    {
+      "slot": "reflex",
+      "modelId": "qwen3-0.6b-q4km",
+      "ollama": "qwen3:0.6b",
+      "displayName": "Qwen3 0.6B — Reflex",
+      "weightLicense": "Apache-2.0 (verify exact weight artifact)",
+      "modality": [
+        "text"
+      ],
+      "purpose": [
+        "intent_classification",
+        "skill_selection",
+        "structured_tool_plan"
+      ],
+      "maxNewTokens": 64
+    },
+    {
+      "slot": "agent-lee",
+      "modelId": "qwen3-1.7b-q4km",
+      "ollama": "qwen3:1.7b",
+      "displayName": "Qwen3 1.7B — Agent Lee Conversation and Office",
+      "weightLicense": "Apache-2.0 (verify exact weight artifact)",
+      "modality": [
+        "text"
+      ],
+      "purpose": [
+        "conversation",
+        "office_drafting",
+        "multi_step_reasoning"
+      ],
+      "maxNewTokens": 64
+    },
+    {
+      "slot": "tablet-eyes",
+      "modelId": "qwen3.5-0.8b",
+      "ollama": "qwen3.5:0.8b",
+      "displayName": "Qwen3.5 0.8B — Tablet Eyes",
+      "weightLicense": "Apache-2.0 (verify exact weight artifact)",
+      "modality": [
+        "text",
+        "image"
+      ],
+      "purpose": [
+        "tablet_screen_perception",
+        "image_analysis",
+        "visual_context"
+      ],
+      "maxNewTokens": 64
+    }
+  ],
+  "security": {
+    "inferOnly": true,
+    "modelMayExecuteTools": false,
+    "modelMayGrantPermissions": false,
+    "modelMaySelectAuthority": false,
+    "requiresIndependentGpuQualification": true,
+    "requiresRequestBoundGpuEvidence": true,
+    "requiresGovernedImageTransport": true
+  },
+  "training": {
+    "immutableBaseWeights": true,
+    "overwriteInstalledWeights": false,
+    "mergeRequiresSeparateQualification": true
+  }
+}

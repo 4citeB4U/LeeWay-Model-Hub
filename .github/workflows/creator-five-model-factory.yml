@@ -1,0 +1,43 @@
+# LEEWAY HEADER — DO NOT REMOVE
+# REGION: LEEWAY.MODEL_HUB.CREATOR_FIVE_MODEL_FACTORY_CI
+# TAG: LEEWAY.MODEL_HUB.CREATOR_FIVE_MODEL_FACTORY_CI.20261122
+# 5WH:
+# WHAT = Test Creator's five-model source readiness and fail-closed app planning.
+# WHY = Prevent unverified model weights, automatic tool authority or training from being falsely promoted.
+# WHO = LeeWay Model Hub source owner; GPT-6 outside support contributor.
+# WHERE = .github/workflows/creator-five-model-factory.yml.
+# WHEN = 2026-11-22.
+# HOW = Run original Node module and source-manifest assertions on Windows, Linux and Apple macOS.
+# LICENSE = Existing repository terms unchanged; no new license asserted.
+name: Creator Five-Model Factory Source Contract
+on:
+  pull_request:
+    paths:
+      - 'contracts/creator-five-model-assistance.v1.json'
+      - 'src/creator-five-model-assistance.mjs'
+      - 'tests/creator-five-model-assistance.test.mjs'
+      - 'catalog/models.json'
+      - 'registry/leeway-model-hub-runtime-manifest.v1.json'
+      - '.github/workflows/creator-five-model-factory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  factory-contract:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original source syntax
+        run: |
+          node --check src/creator-five-model-assistance.mjs
+          node --check tests/creator-five-model-assistance.test.mjs
+      - name: Five-model source and fail-closed task assertions
+        run: node --test tests/creator-five-model-assistance.test.mjs

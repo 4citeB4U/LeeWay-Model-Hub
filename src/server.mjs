@@ -233,7 +233,7 @@ export function createHub({catalog, token, ollamaUrl='http://127.0.0.1:11434',
     if(req.method==='GET'&&url.pathname==='/v1/models')
       return json(res,200,{models:await inventory()},origin,allowed);
     if(req.method==='GET'&&url.pathname==='/v1/status')
-      return json(res,200,{activeModel:activeId,backend:provider,busy,gpuPreviewOnly,gpuRequired,
+      return json(res,200,{activeModel:activeId,backend:provider,busy,gpuPreviewOnly,gpuRequired,threeCoreEnabled:!!threeCore,
         lastWarmTime,lastError,leeWayGpu:await gpuCapabilities(),leeWayGpuPreview:await gpuPreviewStatus(),
         warning:'A GitHub-hosted shader is not evidence of remote model inference. Verify physical provider independently.'},origin,allowed);
     if(req.method==='POST'&&['/v1/models/activate','/v1/chat','/v1/core/infer'].includes(url.pathname)){

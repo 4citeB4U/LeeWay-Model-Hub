@@ -1,0 +1,43 @@
+{
+  "schema": "leeway.model-hub.catalog.v1",
+  "profile": "CREATOR_THREE_MODEL_CORE",
+  "models": [
+    {
+      "id": "qwen3-0.6b-q4km",
+      "displayName": "Qwen3 0.6B — Reflex",
+      "ollama": "qwen3:0.6b",
+      "weightLicense": "Apache-2.0 (verify exact weight artifact)",
+      "family": "Qwen",
+      "role": "reflex",
+      "modality": [
+        "text"
+      ],
+      "description": "Governed LeeWay GPU inference only"
+    },
+    {
+      "id": "qwen3-1.7b-q4km",
+      "displayName": "Qwen3 1.7B — Agent Lee Conversation and Office",
+      "ollama": "qwen3:1.7b",
+      "weightLicense": "Apache-2.0 (verify exact weight artifact)",
+      "family": "Qwen",
+      "role": "agent-lee",
+      "modality": [
+        "text"
+      ],
+      "description": "Governed LeeWay GPU inference only"
+    },
+    {
+      "id": "qwen3.5-0.8b",
+      "displayName": "Qwen3.5 0.8B — Tablet Eyes",
+      "ollama": "qwen3.5:0.8b",
+      "weightLicense": "Apache-2.0 (verify exact weight artifact)",
+      "family": "Qwen",
+      "role": "tablet-eyes",
+      "modality": [
+        "text",
+        "image"
+      ],
+      "description": "Governed LeeWay GPU inference only"
+    }
+  ]
+}

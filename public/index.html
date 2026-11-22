@@ -83,14 +83,15 @@ const $=id=>document.getElementById(id);
 const STATIC_HOST=/(^|\.)(github\.io|vercel\.app)$/.test(location.hostname);
 const hostDefault=(!STATIC_HOST&&/^https?:$/.test(location.protocol))?location.origin:'';
 let endpoint=hostDefault, catalog=[],active=null,service=false,busy=false,installed=new Map(),status={};
+let threeCore=false;
 $('endpoint').value=hostDefault;
 const say=(msg,warn=false)=>{const el=$('serviceNotice');el.textContent=msg;el.className='notice'+(warn?' warn':'')};
 const setReady=()=>{
  const permitted=service&&!!$('token').value.trim()&&!busy;
- $('activate').disabled=!permitted;
+ $('activate').disabled=!permitted||threeCore;
  $('send').disabled=!permitted||!active;
  $('prompt').disabled=!permitted||!active;
- $('backend').disabled=!service||busy;
+ $('backend').disabled=!service||busy||threeCore;
 };
 const errorLabel=e=>e?.message==='API_NOT_JSON'?'The address is a website, not a LeeWay model API.':String(e?.message||e);
 const safeEndpoint=value=>{
@@ -137,7 +138,8 @@ function modelChanged(auto=true){
  const warmth=mstate?.loaded===true?'Warm':mstate?.loaded===false?'Not warm':'Warmth checked on first request';
  $('modelStatus').textContent=m?(m.displayName+' · '+location+' · '+warmth):'No available model';
  $('activationNotice').textContent=active===m?.id?'This model is selected on the connected host.':service?'Choose a model to activate it on the service.':'Models available for discovery; inference host not connected.';
- if(auto&&service&&$('token').value.trim()&&m?.id&&m.id!==active) activate();
+ if(threeCore&&m?.id){active=m.id;$('activationNotice').textContent='Role selected: '+(m.role||m.id)+' · governed LeeWay GPU';}
+ else if(auto&&service&&$('token').value.trim()&&m?.id&&m.id!==active) activate();
 }
 function fillBackends(s){
  const select=$('backend'),prior=select.value,options=[];
@@ -165,12 +167,14 @@ async function discover(){
   if(h.service!=='LEEWAY_MODEL_HUB')throw Error('The endpoint is not LeeWay Model Hub.');
   const [c,s,list]=await Promise.all([api('/v1/catalog'),api('/v1/status'),api('/v1/models')]);
   if(!Array.isArray(c.models))throw Error('Invalid model catalog returned.');
-  service=true;status=s;active=s.activeModel;
+  service=true;status=s;threeCore=s.threeCoreEnabled===true;active=threeCore?$('model').value||c.models[0]?.id:s.activeModel;
   fillBackends(s);
+  if(threeCore){$('backend').replaceChildren();const option=document.createElement('option');option.value='LEEWAY_GPU';option.textContent='LeeWay GPU · governed three-model core';$('backend').append(option);}
   catalog=c.models;installed=new Map((list.models||[]).map(m=>[m.id,m]));
   fillModels();
-  $('serviceBadge').textContent=active?'Model ready: '+active:'Service connected';
-  say('Connected to the LeeWay Model Hub. '+(active?'The selected model is ready to receive requests.':'Select a model for inference.'));
+  $('serviceBadge').textContent=threeCore?'Three-model core connected':active?'Model ready: '+active:'Service connected';
+  say(threeCore?'Connected to the three-model LeeWay Hub. Select a role; inference requires actual GPU qualification.':
+    'Connected to the LeeWay Model Hub. '+(active?'The selected model is ready to receive requests.':'Select a model for inference.'));
   $('status').textContent='Service: connected\nBackend: '+(s.backend||'unknown')+'\nActive model: '+(active||'none');
   const preview=s.leeWayGpuPreview;
   $('gpuStatus').textContent='Production GPU provider: '+(s.leeWayGpu?.status||'NOT_REPORTED')+
@@ -184,6 +188,7 @@ async function discover(){
  }finally{setReady();}
 }
 async function activate(){
+ if(threeCore){active=$('model').value;setReady();return;}
  if(busy||!service)return;
  const id=$('model').value;if(!id)return;
  busy=true;setReady();$('activationNotice').textContent='Activating one model on the LeeWay service…';
@@ -232,7 +237,13 @@ async function chat(){
  const msg=$('prompt').value.trim();if(!msg||!service||!active||busy)return;
  const requestedBackend=$('backend').value||status.backend||'UNKNOWN';
  busy=true;setReady();$('prompt').value='';message('You',msg);proofPending(active,requestedBackend);
- try{const r=await api('/v1/chat','POST',{message:msg});message(r.modelId+' · '+r.backend,r.text);proofSuccess(r);}
+ try{
+  const selected=catalog.find(m=>m.id===active);
+  const r=threeCore?
+    await api('/v1/core/infer','POST',{role:selected?.role,prompt:msg}):
+    await api('/v1/chat','POST',{message:msg});
+  message(r.modelId+' · '+r.backend,r.text);proofSuccess(r);
+ }
  catch(e){message('LeeWay', 'Request could not be completed: '+errorLabel(e));proofFailure(active,requestedBackend,e);}
  finally{busy=false;setReady();}
 }
@@ -262,7 +273,7 @@ $('connect').addEventListener('click',async()=>{
  catch(e){say(errorLabel(e),true);}
 });
 $('refresh').onclick=discover;$('activate').onclick=activate;$('send').onclick=chat;
-$('model').onchange=()=>modelChanged(true);$('token').addEventListener('input',setReady);
+$('model').onchange=()=>{modelChanged(true);if(threeCore){active=$('model').value;setReady();}};$('token').addEventListener('input',setReady);
 $('backend').onchange=()=>modelChanged(false);
 $('searchBtn').onclick=search;$('search').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
 $('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chat()}});

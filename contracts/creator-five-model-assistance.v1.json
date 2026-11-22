@@ -224,5 +224,130 @@
       "NEW_SCHEDULER_AUTHORITY"
     ],
     "noHostStatus": "DEFER_AND_PRESERVE_CHECKPOINT_NOT_RUNNING"
+  },
+  "lightweightProfile": {
+    "profileId": "LEEWAY_QWEN3_COMPACT_CPU_FIRST",
+    "status": "CANDIDATE_SELECTION_NOT_INSTALLED_OR_RUNNING",
+    "operatingMode": "MINIMAL_ACTIVE_MODEL_STORAGE_AND_ON_DEMAND_SPECIALISTS",
+    "sourceOfTruth": "EXISTING_MODEL_HUB_CATALOG_AND_ORIGINAL_RUNTIME_MANIFEST",
+    "ownerAuthority": "LEEWAY_MACHINE_CONSCIOUSNESS_AGENT_LEE_UNDER_CREATOR_AND_RUNTIME",
+    "residentLimit": "MEASURE_HARDWARE_AND_MEMORY_BEFORE_SELECTING_WARM_POOL",
+    "targetPublishedPackageMegabytes": 2215,
+    "targetPublishedPackageUnits": "DECIMAL_MB_NOT_RAM",
+    "targetIsMeasuredFootprint": false,
+    "candidateCore": [
+      {
+        "modelId": "gemma-3-270m-q4km",
+        "sourceType": "ALREADY_IN_CANONICAL_CATALOG",
+        "providerTag": "hf.co/second-state/gemma-3-270m-it-GGUF:Q4_K_M",
+        "publishedPackageMegabytes": 292,
+        "upstreamLicense": "Google Gemma Terms",
+        "status": "CATALOG_ONLY_LIVE_INSTALL_UNVERIFIED",
+        "role": "bounded_classification"
+      },
+      {
+        "modelId": "qwen3-0.6b-q4km",
+        "sourceType": "EXISTING_QWEN3_FAMILY_IN_EDGE_GPU_HISTORY_INTAKE_PENDING",
+        "providerTag": "qwen3:0.6b",
+        "upstreamModel": "Qwen/Qwen3-0.6B",
+        "publishedPackageMegabytes": 523,
+        "upstreamLicense": "apache-2.0",
+        "status": "NOT_IN_CANONICAL_MODEL_HUB_CATALOG_INTAKE_REQUIRED",
+        "role": "fast_reasoning_and_skill_plan"
+      },
+      {
+        "modelId": "qwen3-1.7b-q4km",
+        "sourceType": "VERIFIED_PUBLIC_SOURCE_NOT_YET_ADMITTED",
+        "providerTag": "qwen3:1.7b",
+        "upstreamModel": "Qwen/Qwen3-1.7B",
+        "publishedPackageMegabytes": 1400,
+        "upstreamLicense": "apache-2.0",
+        "status": "NOT_IN_CANONICAL_MODEL_HUB_CATALOG_INTAKE_REQUIRED",
+        "role": "office_ide_and_multistep_reasoning"
+      }
+    ],
+    "historicallyInstalledButNotLiveRechecked": [
+      {
+        "modelId": "gemma-3-1b-q4km",
+        "role": "conversation_while_compact_models_pending"
+      },
+      {
+        "modelId": "qwen-2-5-0-5b-local",
+        "role": "ultralight_existing_fallback"
+      }
+    ],
+    "retainedOnDemand": [
+      {
+        "modelId": "qwen3-4b",
+        "role": "complex_ide_and_reasoning",
+        "publishedPackageMegabytes": 2497.280256,
+        "status": "SOURCE_MANIFEST_AND_LOCAL_FILENAME_ONLY_NOT_QUALIFIED"
+      },
+      {
+        "modelId": "qwen-3-5-4b-local",
+        "role": "historical_fallback",
+        "status": "HISTORICALLY_INSTALLED_NOT_LIVE_VERIFIED"
+      }
+    ],
+    "retainedCold": [
+      {
+        "modelId": "qwen3-vl-8b-instruct",
+        "role": "visual_deep_tasks",
+        "status": "PRESERVE_ORIGINAL_WEIGHTS_NO_AUTOWARM"
+      },
+      {
+        "modelId": "wan2.1-t2v-1.3b",
+        "role": "deep_video_generation",
+        "status": "PRESERVE_ORIGINAL_WEIGHTS_NO_AUTOWARM"
+      }
+    ],
+    "optionalResearchOnly": [
+      {
+        "modelId": "qwen3.5-0.8b",
+        "providerTag": "qwen3.5:0.8b",
+        "upstreamModel": "Qwen/Qwen3.5-0.8B",
+        "publishedPackageMegabytesEstimate": 1200,
+        "status": "UNINSTALLED_UNADMITTED_IMAGE_INPUT_ADAPTER_NOT_VERIFIED",
+        "role": "conditional_lightweight_visual_assistance"
+      }
+    ],
+    "skillsBinding": {
+      "canonicalRepository": "4citeB4U/LeeWay-Agent-Skills",
+      "selectionOwner": "skills/leeway-skill-orchestrator/SKILL.md",
+      "authorityOwner": "skills/leeway-tool-gateway/SKILL.md",
+      "flow": [
+        "AGENT_LEE_AND_MACHINE_CONSCIOUSNESS",
+        "EXISTING_FORMULA",
+        "LEEWAY_SKILL_ORCHESTRATOR",
+        "LEEWAY_TOOL_GATEWAY",
+        "AUTHORIZED_RUNTIME_FABRIC",
+        "AUTHORIZED_DEVICE_BRIDGE",
+        "INDEPENDENT_VERITAS",
+        "RECEIPT_AUTHORITY"
+      ],
+      "allModelsShareSameSkillGraph": true,
+      "modelOutputIsOnlySuggestion": true,
+      "skillsMayBeListedNotExecutable": true,
+      "skillGrantFromModel": false,
+      "runtimeBindingState": "SOURCE_CONTRACT_ONLY_NOT_CONNECTED"
+    },
+    "modelIntake": {
+      "approvalBeforeNewDownload": "REQUIRED",
+      "licenseReadback": "REQUIRED",
+      "hashOfOriginalWeight": "REQUIRED",
+      "qualityBaseline": "REQUIRED",
+      "originalUnmodifiedWeightsRetained": true,
+      "automaticDownload": false,
+      "automaticWeightDeletion": false,
+      "automaticInference": false,
+      "automaticExternalModelApiFallback": false
+    },
+    "githubCpu": {
+      "pages": "STATIC_UI_AND_CATALOG_ONLY_NO_SERVER_COMPUTE",
+      "actions": "EPHEMERAL_BOUNDED_CI_AND_EVALUATION_NOT_ALWAYS_ON_SERVICE",
+      "browserCpu": "OPTIONAL_QUALIFIED_CLIENT_SIDE_WASM_NOT_ESTABLISHED",
+      "productionCompute": "EXISTING_AUTHORIZED_LEEWAY_GPU_CPU_RAM_OR_APPROVED_HOST",
+      "claimGitHubAsPersistentCpu": false
+    }
   }
 }

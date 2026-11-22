@@ -24,7 +24,10 @@ export function inspectCreatorFiveModelRoster({catalog, runtimeManifest, contrac
       contract.governance?.modelsMayAuthorizeTools !== false ||
       contract.governance?.modelsMayWriteProcedureOrWeightsWithoutApproval !== false ||
       contract.artifactPlan?.automaticWeightOverwrite !== false ||
-      contract.threeHourReview?.scheduleState !== 'UNSCHEDULED_UNTIL_ACTUAL_RUNTIME_ADMISSION') {
+      contract.threeHourReview?.scheduleState !== 'UNSCHEDULED_UNTIL_ACTUAL_RUNTIME_ADMISSION' ||
+      contract.governance?.modelTaskOwnership !== 'NONE_NATIVE_LEEWAY_WORKERS_EXECUTE_UNDER_CONSCIOUSNESS' ||
+      contract.governance?.allowModelsToBuildWorkersDirectly !== false ||
+      contract.governance?.modelVeritasIndependence !== 'MODEL_CRITIQUE_NEVER_COUNTS_AS_INDEPENDENT_VERITAS') {
     throw Error('CREATOR_MODEL_AUTHORITY_CONTRACT_INVALID');
   }
   if (catalog?.schema !== 'leeway.model-hub.catalog.v1' ||
@@ -84,7 +87,11 @@ export function planCreatorFactoryTask({
   }
   return Object.freeze({
     status: 'CANDIDATE_PLAN_REQUIRES_ORIGINAL_RUNTIME_ADMISSION',
-    application, task, candidateModels: Object.freeze([...entry.models]),
+    application, task, candidateModels: Object.freeze([...entry.models]), // advisory contributors only
+    candidateModelParticipation: entry.modelParticipation,
+    nativeExecutionOwner: entry.executionAuthority,
+    modelMayRenderOrPublish: false,
+    machineConsciousnessOwnsTask: true,
     sourceIds: Object.freeze([...sourceIds]),
     outputOwner: entry.outputOwner, dataPolicy: entry.dataPolicy,
     deterministicOutputRequired: entry.deterministicOutputRequired,
@@ -127,6 +134,7 @@ export function inspectCreatorLightweightProfile({
   inspectCreatorFiveModelRoster({catalog, runtimeManifest, contract});
   const profile = contract.lightweightProfile;
   const skill = profile?.skillsBinding;
+  const support = profile?.consciousnessFirstSupport;
   if (profile?.profileId !== 'LEEWAY_QWEN3_TRINITY_COMPACT_ASSISTIVE' ||
       profile?.status !== 'CREATOR_SELECTED_CANDIDATE_NOT_INSTALLED_OR_RUNNING' ||
       !Array.isArray(profile?.candidateCore) || profile.candidateCore.length !== 3 ||
@@ -136,6 +144,14 @@ export function inspectCreatorLightweightProfile({
       skill?.runtimeBindingState !== 'SOURCE_CONTRACT_ONLY_NOT_CONNECTED' ||
       skill?.modelOutputIsOnlySuggestion !== true || skill?.skillGrantFromModel !== false ||
       profile?.modelIntake?.automaticDownload !== false ||
+      support?.ownerRepo !== '4citeB4U/Machine-Consciousness' ||
+      support?.ownerCoreType !== 'DETERMINISTIC_NON_LLM_MACHINE_CONSCIOUSNESS' ||
+      support?.modelTeamCanIssueActions !== false ||
+      support?.modelTeamCanCreateWorkers !== false ||
+      support?.modelTeamCanPromoteSkills !== false ||
+      support?.modelTeamCanVerifyIndependently !== false ||
+      support?.modelsRequiredForNativeAction !== false ||
+      support?.inspectionSchedulerState !== 'NOT_REGISTERED_OR_LIVE_VERIFIED' ||
       profile?.modelIntake?.automaticWeightDeletion !== false ||
       profile?.modelIntake?.automaticInference !== false ||
       profile?.githubCpu?.claimGitHubAsPersistentCpu !== false) {
@@ -200,6 +216,10 @@ export function inspectCreatorLightweightProfile({
     retainedCold: Object.freeze(profile.retainedCold.map(model => model.modelId)),
     automaticDownloads: false,
     productionCpuProvider: 'NOT_VERIFIED',
+    machineConsciousnessOwner: support.ownerRepo,
+    modelTeamOnlyAdvisory: true,
+    independentVerificationFromModels: false,
+    nativeExecution: 'NOT_EXECUTED',
     mutation: 'NOT_EXECUTED'
   });
 }
@@ -231,7 +251,10 @@ export function planCreatorSkillAssistance({
     route: Object.freeze([...profile.skillsRoute]),
     boundedCapability: taskEntry.task,
     registeredSkillIdentity: 'NOT_RESOLVED',
+    consciousnessOwner: profile.machineConsciousnessOwner,
     modelMayAuthorizeTools: false,
+    modelMayDesignButCannotCreateWorker: true,
+    modelReviewIsNotIndependentVeritas: true,
     toolGrant: 'NOT_CONFERRED',
     formulaAdmission: 'NOT_EVALUATED',
     runtimeSkillsList: 'NOT_CALLED',

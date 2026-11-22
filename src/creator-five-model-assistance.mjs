@@ -102,7 +102,7 @@ export function planCreatorFactoryTask({
     modelsMayCreateWorkers: false,
     modelsOptionalForNativeWork: true,
     candidateModelParticipation: entry.modelParticipation,
-    nativeExecutionOwner: entry.executionAuthority,
+    nativeExecutionOwner: entry.nativeExecutionOwner,
     modelMayRenderOrPublish: false,
     machineConsciousnessOwnsTask: true,
     sourceIds: Object.freeze([...sourceIds]),

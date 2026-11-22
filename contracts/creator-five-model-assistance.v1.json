@@ -1,0 +1,228 @@
+{
+  "schemaVersion": "leeway.model-hub.creator-assistance-plan.v1",
+  "authority": "LEEWAY_MODEL_HUB_SELECTION_ONLY",
+  "status": "SOURCE_CONTRACT_NO_ADMITTED_EXECUTION",
+  "governance": {
+    "modelRole": "OPTIONAL_BOUNDED_TEACHER_AND_CAPABILITY_PROVIDER",
+    "decisionAuthority": "LEEWAY_MACHINE_CONSCIOUSNESS_AGENT_LEE_UNDER_CREATOR_AND_RUNTIME",
+    "runtimeAuthority": "EXISTING_LEEWAY_RUNTIME_FABRIC",
+    "computeAuthority": "leeway.gpu.service",
+    "formulaAuthority": "EXISTING_LEEWAY_FORMULA",
+    "evidenceAuthorities": [
+      "INDEPENDENT_VERITAS",
+      "RECEIPT_AUTHORITY",
+      "LEEWAY_CONTINUUM",
+      "LEEWAY_LEARNING_LEDGER"
+    ],
+    "modelsMayAuthorizeTools": false,
+    "modelsMayWriteProcedureOrWeightsWithoutApproval": false,
+    "modelOutputTrust": "UNTRUSTED_CANDIDATE_UNTIL_GROUNDED_VALIDATED_AND_AUTHORIZED",
+    "externalInferenceFallback": "FORBIDDEN_UNLESS_SEPARATELY_APPROVED",
+    "sourceManifestIsNotPhysicalEvidence": true
+  },
+  "primaryModels": [
+    {
+      "id": "gemma-3-1b-q4km",
+      "source": "catalog/models.json",
+      "family": "Gemma",
+      "role": "conversation_and_office_copy"
+    },
+    {
+      "id": "gemma-3-270m-q4km",
+      "source": "catalog/models.json",
+      "family": "Gemma",
+      "role": "low_resource_classification"
+    },
+    {
+      "id": "qwen3-4b",
+      "source": "registry/leeway-model-hub-runtime-manifest.v1.json",
+      "family": "Qwen",
+      "role": "reasoning_and_ide_code"
+    },
+    {
+      "id": "qwen3-vl-8b-instruct",
+      "source": "registry/leeway-model-hub-runtime-manifest.v1.json",
+      "family": "Qwen",
+      "role": "vision_and_source_analysis"
+    },
+    {
+      "id": "wan2.1-t2v-1.3b",
+      "source": "registry/leeway-model-hub-runtime-manifest.v1.json",
+      "family": "Wan",
+      "role": "video_generation"
+    }
+  ],
+  "appTasks": [
+    {
+      "application": "OFFICE",
+      "task": "source_to_infographic",
+      "models": [
+        "qwen3-4b",
+        "gemma-3-1b-q4km",
+        "qwen3-vl-8b-instruct"
+      ],
+      "requiresSources": true,
+      "outputOwner": "LEEWAY_OFFICE_SUITES_RENDERER",
+      "deterministicOutputRequired": true,
+      "dataPolicy": "CITE_EACH_CLAIM_TO_APPROVED_SOURCE",
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+    },
+    {
+      "application": "OFFICE",
+      "task": "document_drafting",
+      "models": [
+        "gemma-3-1b-q4km",
+        "qwen3-4b"
+      ],
+      "requiresSources": false,
+      "outputOwner": "LEEWAY_OFFICE_SUITES",
+      "deterministicOutputRequired": false,
+      "dataPolicy": "HUMAN_REVIEW_BEFORE_EXTERNAL_USE",
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+    },
+    {
+      "application": "CONTENT_FOUNDRY",
+      "task": "visual_campaign_and_copy",
+      "models": [
+        "qwen3-4b",
+        "gemma-3-1b-q4km",
+        "qwen3-vl-8b-instruct"
+      ],
+      "requiresSources": false,
+      "outputOwner": "LEEWAY_CONTENT_FOUNDRY",
+      "deterministicOutputRequired": true,
+      "dataPolicy": "VERIFY_BRAND_RIGHTS_AND_SOURCE",
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+    },
+    {
+      "application": "CONTENT_FOUNDRY",
+      "task": "text_to_video",
+      "models": [
+        "wan2.1-t2v-1.3b",
+        "qwen3-4b"
+      ],
+      "requiresSources": false,
+      "outputOwner": "LEEWAY_CONTENT_FOUNDRY",
+      "deterministicOutputRequired": false,
+      "dataPolicy": "LICENSE_AND_POST_OUTPUT_REVIEW_REQUIRED",
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+    },
+    {
+      "application": "IDE",
+      "task": "plan_code_review_and_test",
+      "models": [
+        "qwen3-4b",
+        "gemma-3-1b-q4km",
+        "qwen3-vl-8b-instruct"
+      ],
+      "requiresSources": true,
+      "outputOwner": "LEEWAY_IDE",
+      "deterministicOutputRequired": true,
+      "dataPolicy": "COMMAND_EXECUTION_ONLY_BY_AUTHORIZED_RUNTIME",
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+    },
+    {
+      "application": "CRM_ERP",
+      "task": "sales_followup_and_pipeline",
+      "models": [
+        "gemma-3-1b-q4km",
+        "gemma-3-270m-q4km",
+        "qwen3-4b"
+      ],
+      "requiresSources": true,
+      "outputOwner": "LEEWAY_CRM_ERP",
+      "deterministicOutputRequired": true,
+      "dataPolicy": "CONTACT_CONSENT_TENANT_ISOLATION_AND_SEND_APPROVAL",
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+    },
+    {
+      "application": "LOGISTICS",
+      "task": "route_guidance_and_traffic_camera_context",
+      "models": [
+        "qwen3-4b",
+        "qwen3-vl-8b-instruct",
+        "gemma-3-270m-q4km"
+      ],
+      "requiresSources": true,
+      "outputOwner": "LEEWAY_LOGISTICS",
+      "deterministicOutputRequired": true,
+      "dataPolicy": "LICENSED_LIVE_CCTV_FEEDS_AND_DRIVER_DISTRACTION_RESTRICTIONS",
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+    },
+    {
+      "application": "LOGISTICS",
+      "task": "route_shops_facts_and_promotions",
+      "models": [
+        "qwen3-4b",
+        "gemma-3-1b-q4km"
+      ],
+      "requiresSources": true,
+      "outputOwner": "LEEWAY_LOGISTICS",
+      "deterministicOutputRequired": true,
+      "dataPolicy": "CURRENT_AUTHORIZED_BUSINESS_AND_AD_SOURCE_REQUIRED",
+      "executionStatus": "NOT_IMPLEMENTED_BY_THIS_CONTRACT"
+    }
+  ],
+  "artifactPlan": {
+    "originalBytesImmutable": true,
+    "noWeightsInNormalGit": true,
+    "physicalMaterialization": "ORIGINAL_MODEL_HUB_HOST_VIA_QUALIFIED_CONTINUUM",
+    "transformations": [
+      "EXACT_STORAGE_COMPRESSION_BASELINED",
+      "FORMAT_COMPATIBLE_QUANTIZATION_CANDIDATE",
+      "BOUNDED_CPU_RAM_WORKING_SET_AND_KV_CACHE",
+      "OPTIONAL_DISTILLATION_WITH_LICENSE_AND_EVALUATION"
+    ],
+    "doNotConflate": [
+      "STORED_BYTES",
+      "HOT_WORKING_SET_BYTES",
+      "TRANSFER_BYTES",
+      "INFERENCE_QUALITY",
+      "TOKENS_PER_SECOND"
+    ],
+    "promotionGates": [
+      "SOURCE_COMMIT_PINNED",
+      "OWNER_LICENSE_APPROVED",
+      "ORIGINAL_WEIGHT_SHA256_READBACK",
+      "BASELINE_MODEL_INFERENCE_MEASURED",
+      "CANDIDATE_TRANSFORM_SIZE_AND_HASH_VERIFIED",
+      "POST_TRANSFORM_QUALITY_AND_LATENCY_EVALUATED",
+      "FORMULA_POLICY_AUTHORIZED",
+      "LEEWAY_GPU_FULL_EXECUTION_OBSERVED",
+      "VERITAS_PRE_AND_POST_INDEPENDENTLY_VERIFIED",
+      "CONTINUUM_WRITTEN_AND_READ_BACK",
+      "RECEIPT_AUTHORITY_WRITTEN_AND_READ_BACK"
+    ],
+    "automaticWeightOverwrite": false,
+    "automaticNativeGpuComputeEnrollment": false
+  },
+  "threeHourReview": {
+    "cadenceHours": 3,
+    "schedulerOwner": "EXISTING_RUNTIME_FABRIC_WORKPLANE",
+    "curriculumOwner": "EXISTING_MACHINE_CONSCIOUSNESS_TRAINING",
+    "scheduleState": "UNSCHEDULED_UNTIL_ACTUAL_RUNTIME_ADMISSION",
+    "purpose": "SOURCE_GROUNDED_TASK_EVALUATION_AND_SKILL_PROPOSALS",
+    "candidateInputs": [
+      "USER_APPROVED_SOURCES",
+      "MODEL_TASK_OUTPUTS_WITH_PROVENANCE",
+      "CANONICAL_VERIFIED_EXECUTION_RECEIPTS"
+    ],
+    "reviewStages": [
+      "PERMISSION_CHECK",
+      "CHOOSE_BOUNDED_TASKS",
+      "TEACHER_OUTPUT_AS_UNTRUSTED_CANDIDATE",
+      "BASELINE_EVAL",
+      "DETERMINISTIC_TEACH_BACK",
+      "NEGATIVE_TESTS",
+      "INDEPENDENT_VERIFICATION",
+      "ELIGIBLE_LEARNING_LEDGER_ADMISSION"
+    ],
+    "forbidden": [
+      "AUTONOMOUS_MODEL_WEIGHT_RETRAINING",
+      "UNAPPROVED_SKILL_PROMOTION",
+      "UNVERIFIED_RECEIPT_INGESTION",
+      "NEW_SCHEDULER_AUTHORITY"
+    ],
+    "noHostStatus": "DEFER_AND_PRESERVE_CHECKPOINT_NOT_RUNNING"
+  }
+}

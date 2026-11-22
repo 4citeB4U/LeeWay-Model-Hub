@@ -1,0 +1,41 @@
+# LEEWAY HEADER — DO NOT REMOVE
+# REGION: MODEL_HUB / CONTINUOUS_QUALIFICATION
+# TAG: LEEWAY.MODEL_HUB.SLOTS.CI.V1
+# WHO: Leonard Jerome Lee, LeeWay Industries
+# WHAT: Test model-card admission on three host OSes without downloading weights
+# WHEN: 2026-10-25
+# WHERE: .github/workflows/model-slot-contract.yml
+# WHY: Confirm bounded catalog selection independent of customer hardware
+# HOW: Built-in Node test runner, no model provider, GPU or secret required
+# AUTHORITY: Fixture-only; not GPU or C3 production evidence
+# LICENSE: LeeWay original source
+name: Model slot contract
+on:
+  pull_request:
+    paths:
+      - 'src/model-slots.mjs'
+      - 'tests/model-slots.test.mjs'
+      - '.github/workflows/model-slot-contract.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/model-slots.mjs'
+      - 'tests/model-slots.test.mjs'
+      - '.github/workflows/model-slot-contract.yml'
+jobs:
+  slots:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source and run model card tests
+        run: |
+          node --check src/model-slots.mjs
+          node --test tests/model-slots.test.mjs
